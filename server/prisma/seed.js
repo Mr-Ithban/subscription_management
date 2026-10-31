@@ -9,8 +9,8 @@ export async function seedAuth(prisma) {
     where: { email: 'admin@brightloop.test' },
     update: { name: 'Brightloop Admin' },
     create: {
-      name: 'Brightloop Admin',
       email: 'admin@brightloop.test',
+      name: 'Brightloop Admin',
       passwordHash,
       role: 'ADMIN',
     },
