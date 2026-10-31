@@ -10,6 +10,11 @@ import productsRouter from './modules/catalog/products/routes.js';
 import plansRouter from './modules/catalog/plans/routes.js';
 import taxesRouter from './modules/catalog/taxes/routes.js';
 import discountsRouter from './modules/catalog/discounts/routes.js';
+import templatesRouter from './modules/subscriptions/templates/routes.js';
+import subscriptionsRouter from './modules/subscriptions/subscriptions/routes.js';
+import billingRouter from './modules/billing/routes.js';
+import invoicesRouter from './modules/billing/invoiceRoutes.js';
+import portalBillingRouter from './modules/billing/portalRoutes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -56,6 +61,11 @@ app.use('/api/products', productsRouter);
 app.use('/api/plans', plansRouter);
 app.use('/api/taxes', taxesRouter);
 app.use('/api/discounts', discountsRouter);
+app.use('/api/quotation-templates', templatesRouter);
+app.use('/api/subscriptions', subscriptionsRouter);
+app.use('/api/billing', billingRouter);
+app.use('/api/invoices', invoicesRouter);
+app.use('/api/portal', portalBillingRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);

@@ -8,6 +8,8 @@ import ProductsPage from './pages/catalog/ProductsPage';
 import PlansPage from './pages/catalog/PlansPage';
 import TaxesPage from './pages/catalog/TaxesPage';
 import DiscountsPage from './pages/catalog/DiscountsPage';
+import BillingPage from './pages/billing/BillingPage';
+import PortalPage from './pages/portal/PortalPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,8 +43,18 @@ export default function App() {
                 <Route path="plans" element={<PlansPage />} />
                 <Route path="taxes" element={<TaxesPage />} />
                 <Route path="discounts" element={<DiscountsPage />} />
+                <Route path="billing" element={<BillingPage />} />
               </Route>
             </Route>
+
+            <Route
+              path="/portal"
+              element={
+                <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                  <PortalPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Catch-all fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
