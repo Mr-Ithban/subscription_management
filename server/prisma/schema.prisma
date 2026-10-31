@@ -304,6 +304,7 @@ model Invoice {
   taxTotal       Int               @default(0)
   discountTotal  Int               @default(0)
   total          Int
+  amountPaid     Int               @default(0)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   subscription   Subscription      @relation(fields: [subscriptionId], references: [id])
