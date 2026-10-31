@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './modules/auth/routes.js';
 import productsRouter from './modules/catalog/products/routes.js';
 import templatesRouter from './modules/subscriptions/templates/routes.js';
+import subscriptionsRouter from './modules/subscriptions/subscriptions/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -52,6 +53,7 @@ app.use('/api/auth', authRateLimit, authRoutes);
 // Catalog routes
 app.use('/api/products', productsRouter);
 app.use('/api/quotation-templates', templatesRouter);
+app.use('/api/subscriptions', subscriptionsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
