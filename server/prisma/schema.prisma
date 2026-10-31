@@ -19,15 +19,16 @@ enum Role {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  passwordHash   String
-  role           Role      @default(CUSTOMER)
-  resetTokenHash String?
-  resetExpiry    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  customer       Customer?
+  id                  String                @id @default(cuid())
+  email               String                @unique
+  passwordHash        String
+  role                Role                  @default(CUSTOMER)
+  resetTokenHash      String?
+  resetExpiry         DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  customer            Customer?
+  subscriptionHistory SubscriptionHistory[]
 }
 
 model Customer {
@@ -280,6 +281,7 @@ model SubscriptionHistory {
   note           String?
   createdAt      DateTime            @default(now())
   subscription   Subscription        @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  changedBy      User?               @relation(fields: [changedById], references: [id], onDelete: SetNull)
 
   @@index([subscriptionId, createdAt])
   @@index([changedById])
@@ -290,7 +292,7 @@ model Invoice {
   number         String            @unique
   subscriptionId String
   customerId     String
-  customer       Customer          @relation(fields: [customerId], references: [id])
+  customer       Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
   status         InvoiceStatus     @default(DRAFT)
   periodStart    DateTime
   periodEnd      DateTime
