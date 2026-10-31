@@ -18,15 +18,16 @@ enum Role {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  passwordHash   String
-  role           Role      @default(CUSTOMER)
-  resetTokenHash String?
-  resetExpiry    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  customer       Customer?
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  role            Role      @default(CUSTOMER)
+  resetTokenHash  String?
+  resetExpiry     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  customer        Customer?
+  createdPayments Payment[]
 }
 
 model Customer {
@@ -272,6 +273,7 @@ model Invoice {
   subscription   Subscription      @relation(fields: [subscriptionId], references: [id])
   lines          InvoiceLine[]
   discounts      InvoiceDiscount[]
+  payments       Payment[]
 
   // Billing periods are half-open [periodStart, periodEnd); this prevents duplicate runs.
   @@unique([subscriptionId, periodStart])
@@ -332,4 +334,31 @@ model BillingRun {
 
   @@index([status, startedAt])
   @@index([startedAt])
+}
+
+// ===== PAYMENTS =====
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  UPI
+  CHEQUE
+  ONLINE
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice       @relation(fields: [invoiceId], references: [id])
+  method      PaymentMethod
+  amount      Int
+  paidAt      DateTime
+  note        String?
+  createdById String?
+  createdBy   User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@index([paidAt])
+  @@index([createdById])
 }
