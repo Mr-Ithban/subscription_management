@@ -10,7 +10,8 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "seed:large": "node prisma/seedLarge.js",
     "explain": "node scripts/explain.js",
-    "benchmark": "node scripts/benchmark.js"
+    "benchmark": "node scripts/benchmark.js",
+    "start:prod": "npx prisma migrate deploy && node src/server.js"
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
