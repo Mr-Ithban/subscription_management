@@ -19,6 +19,7 @@ export const subscriptionsQuerySchema = z.object({
   status: z.enum(['DRAFT', 'QUOTATION', 'CONFIRMED', 'ACTIVE', 'CLOSED']).optional(),
   planId: z.string().optional(),
   customerId: z.string().optional(),
+  search: z.string().trim().max(120).optional(),
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
 });

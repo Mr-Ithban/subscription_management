@@ -5,6 +5,7 @@ import api from '../../api/client';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
+import { formatMinorCurrency } from '../../utils/currency';
 
 const STATUS_OPTIONS = [
   'ALL',
@@ -21,10 +22,11 @@ export default function Subscriptions() {
   const [search, setSearch] = useState('');
 
   const { data, isLoading } = useQuery({
-    queryKey: ['report-subscriptions', page, status],
+    queryKey: ['report-subscriptions', page, status, search],
     queryFn: async () => {
       const params = { page, limit: 15 };
       if (status !== 'ALL') params.status = status;
+      if (search.trim()) params.search = search.trim();
       const res = await api.get('/api/reports/subscriptions', { params });
       return res.data;
     },
@@ -32,14 +34,6 @@ export default function Subscriptions() {
   });
 
   const rawData = data?.data || [];
-  const filteredData = search
-    ? rawData.filter(
-        (sub) =>
-          sub.number?.toLowerCase().includes(search.toLowerCase()) ||
-          sub.customer?.name?.toLowerCase().includes(search.toLowerCase()) ||
-          sub.plan?.name?.toLowerCase().includes(search.toLowerCase())
-      )
-    : rawData;
 
   const columns = [
     {
@@ -61,7 +55,7 @@ export default function Subscriptions() {
         <div>
           <span className="font-medium text-gray-900">{sub.plan?.name || 'Standard'}</span>
           <span className="text-xs text-gray-500 block">
-            {sub.plan?.billingPeriod} • ₹{sub.plan?.price}
+            {sub.plan?.billingPeriod} • {formatMinorCurrency(sub.plan?.price)}
           </span>
         </div>
       ),
@@ -100,7 +94,7 @@ export default function Subscriptions() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by number, customer..."
             className="block w-full rounded-md border-gray-300 pl-10 text-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
           />
@@ -129,7 +123,7 @@ export default function Subscriptions() {
       {/* Subscriptions Table */}
       <DataTable
         columns={columns}
-        data={filteredData}
+        data={rawData}
         isLoading={isLoading}
         emptyMessage="No subscriptions match the selected criteria."
         pagination={{

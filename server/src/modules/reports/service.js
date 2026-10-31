@@ -358,6 +358,7 @@ export async function getRevenueBreakdown(prisma, { from, to, groupBy = 'month' 
  * @param {string} [options.filters.status]
  * @param {string} [options.filters.planId]
  * @param {string} [options.filters.customerId]
+ * @param {string} [options.filters.search]
  * @param {{ page: number; limit: number; skip: number }} [options.pagination]
  * @returns {Promise<object>}
  */
@@ -369,6 +370,13 @@ export async function getSubscriptionsReport(
   if (filters.status) where.status = filters.status;
   if (filters.planId) where.planId = filters.planId;
   if (filters.customerId) where.customerId = filters.customerId;
+  if (filters.search) {
+    where.OR = [
+      { number: { contains: filters.search, mode: 'insensitive' } },
+      { customer: { name: { contains: filters.search, mode: 'insensitive' } } },
+      { plan: { name: { contains: filters.search, mode: 'insensitive' } } },
+    ];
+  }
 
   const [total, data] = await Promise.all([
     prisma.subscription.count({ where }),

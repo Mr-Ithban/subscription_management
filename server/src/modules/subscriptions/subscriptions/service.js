@@ -84,8 +84,15 @@ export function newSubscriptionNumber() {
   return `SUB-${Date.now()}-${randomBytes(3).toString('hex').toUpperCase()}`;
 }
 
-export async function listSubscriptions(prisma, { page, limit, status, customerId }) {
+export async function listSubscriptions(prisma, { page, limit, status, customerId, search }) {
   const where = { ...(status && { status }), ...(customerId && { customerId }) };
+  if (search) {
+    where.OR = [
+      { number: { contains: search, mode: 'insensitive' } },
+      { customer: { name: { contains: search, mode: 'insensitive' } } },
+      { plan: { name: { contains: search, mode: 'insensitive' } } },
+    ];
+  }
   const [total, subscriptions] = await Promise.all([
     prisma.subscription.count({ where }),
     prisma.subscription.findMany({

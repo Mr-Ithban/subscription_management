@@ -265,7 +265,7 @@ npm run dev                 # http://localhost:5173
 |---|---|---|
 | Admin | `admin@brightloop.test` | `Admin@12345` |
 | Staff | `staff@brightloop.test` | `Staff@12345` |
-| Customer | `customer@brightloop.test` | `Cust@12345` |
+| Customer | `customer@brightloop.test` | `Customer@12345` |
 
 ---
 

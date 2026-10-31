@@ -8,6 +8,8 @@ import {
   FileText,
   Users,
   Package,
+  Layers,
+  FilePlus2,
   LogOut,
   Menu,
   X,
@@ -15,7 +17,9 @@ import {
 
 const adminNav = [
   { label: 'Dashboard', to: '/app/reports/dashboard', icon: LayoutDashboard },
-  { label: 'Subscriptions', to: '/app/reports/subscriptions', icon: BarChart2 },
+  { label: 'Subscriptions', to: '/app/subscriptions', icon: Layers },
+  { label: 'Quotation templates', to: '/app/quotation-templates', icon: FilePlus2 },
+  { label: 'Subscription report', to: '/app/reports/subscriptions', icon: BarChart2 },
   { label: 'Invoices', to: '/app/invoices', icon: FileText },
   { label: 'Payments', to: '/app/payments', icon: CreditCard },
   { label: 'Products', to: '/app/catalog', icon: Package },

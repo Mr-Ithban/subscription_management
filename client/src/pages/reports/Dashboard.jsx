@@ -20,6 +20,7 @@ import api from '../../api/client';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
+import { formatMinorCurrency } from '../../utils/currency';
 
 export default function Dashboard() {
   const [groupBy, setGroupBy] = useState('month');
@@ -80,18 +81,18 @@ export default function Dashboard() {
       value: summary?.activeSubscriptionCount ?? 0,
       icon: Users,
       color: 'text-indigo-600 bg-indigo-50',
-      subtitle: `MRR: ₹${summary?.mrr?.toLocaleString() ?? 0}`,
+      subtitle: `MRR: ${formatMinorCurrency(summary?.mrr)}`,
     },
     {
       name: 'Revenue Collected',
-      value: `₹${(summary?.revenue ?? 0).toLocaleString()}`,
+      value: formatMinorCurrency(summary?.revenue),
       icon: DollarSign,
       color: 'text-emerald-600 bg-emerald-50',
-      subtitle: `Invoiced: ₹${(summary?.invoicedTotal ?? 0).toLocaleString()}`,
+      subtitle: `Invoiced: ${formatMinorCurrency(summary?.invoicedTotal)}`,
     },
     {
       name: 'Outstanding Balance',
-      value: `₹${(summary?.outstandingTotal ?? 0).toLocaleString()}`,
+      value: formatMinorCurrency(summary?.outstandingTotal),
       icon: Clock,
       color: 'text-amber-600 bg-amber-50',
       subtitle: 'Open invoices pending payment',
@@ -101,7 +102,7 @@ export default function Dashboard() {
       value: summary?.overdueCount ?? 0,
       icon: AlertTriangle,
       color: 'text-rose-600 bg-rose-50',
-      subtitle: `Amount: ₹${(summary?.overdueAmount ?? 0).toLocaleString()}`,
+      subtitle: `Amount: ${formatMinorCurrency(summary?.overdueAmount)}`,
     },
   ];
 
@@ -135,7 +136,7 @@ export default function Dashboard() {
     {
       header: 'Balance Due',
       accessor: 'remainingBalance',
-      render: (inv) => `₹${(inv.remainingBalance ?? inv.total).toLocaleString()}`,
+      render: (inv) => formatMinorCurrency(inv.remainingBalance ?? inv.total),
     },
     {
       header: 'Status',
@@ -226,7 +227,7 @@ export default function Dashboard() {
             </h3>
             <p className="text-xs text-gray-500 mt-1">
               Total period collections: ₹
-              {(revenueData?.totalRevenue ?? 0).toLocaleString()}
+              {formatMinorCurrency(revenueData?.totalRevenue)}
             </p>
           </div>
 
@@ -260,10 +261,10 @@ export default function Dashboard() {
                 <XAxis dataKey="period" tick={{ fontSize: 12 }} />
                 <YAxis
                   tick={{ fontSize: 12 }}
-                  tickFormatter={(val) => `₹${val}`}
+                  tickFormatter={(val) => formatMinorCurrency(val)}
                 />
                 <Tooltip
-                  formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                  formatter={(value) => [formatMinorCurrency(value), 'Revenue']}
                   labelFormatter={(label) => `Period: ${label}`}
                 />
                 <Bar dataKey="revenue" fill="#4f46e5" radius={[4, 4, 0, 0]} />

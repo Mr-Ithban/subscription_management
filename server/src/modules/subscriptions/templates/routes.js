@@ -3,17 +3,22 @@ import { PrismaClient } from '@prisma/client';
 import { createAuthenticate } from '../../../middleware/authenticate.js';
 import { authorize } from '../../../middleware/authorize.js';
 import { validate } from '../../../middleware/validate.js';
+import { z } from 'zod';
 import { createSubscriptionFromTemplateSchema, createTemplateSchema, templateIdSchema, updateTemplateSchema } from './validation.js';
 import { createSubscriptionFromTemplate, createTemplate, deleteTemplate, getTemplate, listTemplates, updateTemplate } from './service.js';
 
 const defaultPrisma = new PrismaClient();
+const listTemplatesSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
 
 export function createTemplatesRouter(prisma = defaultPrisma, middleware = {}) {
   const router = Router();
   router.use(middleware.authenticate ?? createAuthenticate(prisma));
   const authorizeRequest = middleware.authorize ?? authorize;
-  router.get('/', authorizeRequest('ADMIN', 'STAFF'), async (_req, res, next) => {
-    try { res.json({ templates: await listTemplates(prisma) }); } catch (error) { next(error); }
+  router.get('/', authorizeRequest('ADMIN', 'STAFF'), validate(listTemplatesSchema, 'query'), async (req, res, next) => {
+    try { res.json(await listTemplates(prisma, req.query)); } catch (error) { next(error); }
   });
   router.post('/', authorizeRequest('ADMIN', 'STAFF'), validate(createTemplateSchema), async (req, res, next) => {
     try { res.status(201).json({ template: await createTemplate(prisma, req.body) }); } catch (error) { next(error); }

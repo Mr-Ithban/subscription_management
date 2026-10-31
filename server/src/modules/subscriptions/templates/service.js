@@ -39,8 +39,13 @@ function lineCreateData(lines) {
   }));
 }
 
-export async function listTemplates(prisma) {
-  return prisma.quotationTemplate.findMany({ include: templateInclude, orderBy: { createdAt: 'desc' } });
+export async function listTemplates(prisma, { page = 1, limit = 20 } = {}) {
+  const where = {};
+  const [total, templates] = await Promise.all([
+    prisma.quotationTemplate.count({ where }),
+    prisma.quotationTemplate.findMany({ where, skip: (page - 1) * limit, take: limit, include: templateInclude, orderBy: { createdAt: 'desc' } }),
+  ]);
+  return { templates, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
 }
 
 export async function getTemplate(prisma, id) {

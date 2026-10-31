@@ -20,6 +20,7 @@ export const createSubscriptionSchema = z.object({
 
 export const updateSubscriptionSchema = z.object({
   customerId: z.string().min(1).optional(),
+  search: z.string().trim().max(120).optional(),
   planId: z.string().min(1).optional(),
   startDate: z.coerce.date().optional(),
   expiryDate: z.coerce.date().nullable().optional(),

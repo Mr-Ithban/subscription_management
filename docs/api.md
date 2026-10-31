@@ -50,7 +50,7 @@ Authentication endpoints are limited to 20 requests per 15 minutes per client.
 
 ## Staff administration
 
-`POST /api/staff` and `GET /api/staff?page=1&limit=20` require an ADMIN bearer token.
+`GET /api/customers?page=1&limit=20&search=...` lists customers for ADMIN and STAFF users; search matches customer names and account emails. `POST /api/staff` and `GET /api/staff?page=1&limit=20` require an ADMIN bearer token.
 Create body: `{ "name": "Sam Staff", "email": "sam@example.test", "password": "StrongPass!" }`.
 The password must contain at least 9 characters, uppercase and lowercase letters, and a special character.
 Staff lists return `{ "data": [], "page": 1, "limit": 20, "total": 0 }` without password hashes.
@@ -76,7 +76,7 @@ Prices are stored as integers in smallest currency units (e.g., 10000 = 100.00).
 | `prod-accounting-suite` | Accounting Suite | `SERVICE` | 10000 | 6000 | Brand variants: `Odoo` (+560 -> 10560), `Zoho` (+300 -> 10300) |
 | `prod-cloud-hosting` | Cloud Hosting Infrastructure | `SERVICE` | 25000 | 15000 | Dedicated compute/storage server instances |
 | `prod-pos-terminal` | Smart POS Terminal | `GOODS` | 45000 | 30000 | Hardware terminal device |
-| `prod-thermal-paper` | Thermal Receipt Paper Rolls | `CONSUMABLE` | 1200 | 600 | 50-roll pack consumable supplies |
+| `prod-thermal-paper` | Thermal Receipt Paper Rolls | `GOODS` | 1200 | 600 | 50-roll pack consumable supplies |
 | `prod-priority-support` | 24/7 Priority Support SLA | `SERVICE` | 8000 | 3000 | Enterprise technical support SLA |
 | `prod-analytics-dashboard` | Executive Analytics Addon | `SERVICE` | 15000 | 5000 | Real-time BI reporting and analytics |
 

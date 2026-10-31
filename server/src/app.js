@@ -19,6 +19,7 @@ import portalBillingRouter from './modules/billing/portalRoutes.js';
 import paymentsRouter, { createInvoicePaymentsRouter } from './modules/payments/routes.js';
 import reportsRouter from './modules/reports/routes.js';
 import portalRouter from './modules/portal/routes.js';
+import customersRouter from './modules/customers/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -61,6 +62,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRateLimit, authRoutes);
 app.use('/api/staff', staffRouter);
+app.use('/api/customers', customersRouter);
 // Catalog routes
 app.use('/api/products', productsRouter);
 app.use('/api/plans', plansRouter);

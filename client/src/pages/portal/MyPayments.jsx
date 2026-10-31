@@ -5,6 +5,7 @@ import api from '../../api/client';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
+import { formatMinorCurrency } from '../../utils/currency';
 
 export default function MyPayments() {
   const [page, setPage] = useState(1);
@@ -40,7 +41,7 @@ export default function MyPayments() {
       header: 'Amount Paid',
       accessor: 'amount',
       render: (p) => (
-        <span className="font-medium text-emerald-700">₹{p.amount?.toLocaleString()}</span>
+        <span className="font-medium text-emerald-700">{formatMinorCurrency(p.amount)}</span>
       ),
     },
     {

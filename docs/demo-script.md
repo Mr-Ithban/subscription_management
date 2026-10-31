@@ -8,7 +8,8 @@
 
 1. Ensure the server is running: `cd server && npm run dev`
 2. Ensure the client is running: `cd client && npm run dev`
-3. Seed data (if first run): `cd server && npm run seed:large`
+3. Seed baseline accounts and catalog (if first run): `cd server && npx prisma db seed`
+4. Add performance demo data (optional): `cd server && npm run seed:large`
 
 ### Seeded accounts
 
@@ -16,7 +17,7 @@
 |------|-------|----------|
 | Admin | `admin@brightloop.test` | `Admin@12345` |
 | Staff | `staff@brightloop.test` | `Staff@12345` |
-| Customer | `customer@brightloop.test` | `Customer@12345` |
+| Customer | `customer_1@brightloop.test` | `Customer@12345` |
 
 ---
 
@@ -66,7 +67,7 @@
 ## Step 5 — Customer Portal (60 s)
 
 1. Open a new tab → `http://localhost:5173/login`
-2. Login as **customer@brightloop.test** / **Customer@12345**
+2. Login as **customer_1@brightloop.test** / **Customer@12345**
 3. App redirects to **My Payment History** portal
 4. Show only this customer's payments (scoped to their account from JWT)
 

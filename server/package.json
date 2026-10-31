@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "lint": "eslint .",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "seed": "node prisma/seed.js",
     "seed:large": "node prisma/seedLarge.js",
     "explain": "node scripts/explain.js",
     "benchmark": "node scripts/benchmark.js",
@@ -40,5 +41,8 @@
   "jest": {
     "transform": {},
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

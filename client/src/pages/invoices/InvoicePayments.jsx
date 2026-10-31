@@ -6,6 +6,7 @@ import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
 import FormField from '../../components/FormField';
+import { formatMinorCurrency } from '../../utils/currency';
 
 const PAYMENT_METHODS = [
   'CARD',
@@ -32,7 +33,7 @@ export default function InvoicePayments({ invoice: initialInvoice = {}, onPaymen
 
   const [formData, setFormData] = useState({
     method: 'CARD',
-    amount: remainingBalance,
+    amount: (remainingBalance / 100).toFixed(2),
     paidAt: new Date().toISOString().slice(0, 10),
     note: '',
   });
@@ -69,13 +70,13 @@ export default function InvoicePayments({ invoice: initialInvoice = {}, onPaymen
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const amountInt = parseInt(formData.amount, 10);
+    const amountInt = Math.round(Number(formData.amount) * 100);
     if (!amountInt || amountInt <= 0) {
       setFormError('Amount must be a positive integer.');
       return;
     }
     if (amountInt > remainingBalance) {
-      setFormError(`Amount cannot exceed remaining balance of ₹${remainingBalance}.`);
+      setFormError(`Amount cannot exceed the remaining balance of ${formatMinorCurrency(remainingBalance)}.`);
       return;
     }
 
@@ -102,7 +103,7 @@ export default function InvoicePayments({ invoice: initialInvoice = {}, onPaymen
             Payments & Transactions
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            Total: ₹{invoice.total} • Paid: ₹{invoice.amountPaid || 0} • Balance: ₹{remainingBalance}
+            Total: {formatMinorCurrency(invoice.total)} • Paid: {formatMinorCurrency(invoice.amountPaid || 0)} • Balance: {formatMinorCurrency(remainingBalance)}
           </p>
         </div>
 
@@ -111,7 +112,7 @@ export default function InvoicePayments({ invoice: initialInvoice = {}, onPaymen
             onClick={() => {
               setFormData({
                 method: 'CARD',
-                amount: remainingBalance,
+                amount: (remainingBalance / 100).toFixed(2),
                 paidAt: new Date().toISOString().slice(0, 10),
                 note: '',
               });
@@ -146,7 +147,7 @@ export default function InvoicePayments({ invoice: initialInvoice = {}, onPaymen
             <div key={p.id} className="py-3 flex items-center justify-between text-sm">
               <div>
                 <div className="font-medium text-gray-900 flex items-center gap-2">
-                  <span>₹{p.amount}</span>
+                  <span>{formatMinorCurrency(p.amount)}</span>
                   <StatusBadge status={p.method} />
                 </div>
                 {p.note && <p className="text-xs text-gray-500 mt-0.5">{p.note}</p>}
@@ -189,14 +190,15 @@ export default function InvoicePayments({ invoice: initialInvoice = {}, onPaymen
           <FormField label="Amount (₹)" required>
             <input
               type="number"
+              step="0.01"
               min="1"
-              max={remainingBalance}
+              max={(remainingBalance / 100).toFixed(2)}
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Remaining balance: ₹{remainingBalance}</p>
+            <p className="text-xs text-gray-500 mt-1">Remaining balance: {formatMinorCurrency(remainingBalance)}</p>
           </FormField>
 
           <FormField label="Payment Date" required>

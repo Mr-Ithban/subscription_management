@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 export async function seedAuth(prisma) {
   const passwordHash = await bcrypt.hash('Admin@12345', 10);
 
-  return prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: { email: 'admin@brightloop.test' },
-    update: { name: 'Brightloop Admin' },
+    update: { name: 'Brightloop Admin', role: 'ADMIN', passwordHash },
     create: {
       email: 'admin@brightloop.test',
       name: 'Brightloop Admin',
@@ -15,6 +15,35 @@ export async function seedAuth(prisma) {
       role: 'ADMIN',
     },
   });
+  const staffHash = await bcrypt.hash('Staff@12345', 10);
+  await prisma.user.upsert({
+    where: { email: 'staff@brightloop.test' },
+    update: { name: 'Brightloop Staff', role: 'STAFF', passwordHash: staffHash },
+    create: {
+      email: 'staff@brightloop.test',
+      name: 'Brightloop Staff',
+      passwordHash: staffHash,
+      role: 'STAFF',
+    },
+  });
+
+  const customerHash = await bcrypt.hash('Customer@12345', 10);
+  const customerUser = await prisma.user.upsert({
+    where: { email: 'customer@brightloop.test' },
+    update: { name: 'Brightloop Customer', role: 'CUSTOMER', passwordHash: customerHash },
+    create: {
+      email: 'customer@brightloop.test',
+      name: 'Brightloop Customer',
+      passwordHash: customerHash,
+      role: 'CUSTOMER',
+    },
+  });
+  await prisma.customer.upsert({
+    where: { userId: customerUser.id },
+    update: { name: 'Brightloop Customer' },
+    create: { userId: customerUser.id, name: 'Brightloop Customer' },
+  });
+  return admin;
 }
 
 export async function seedCatalog(prisma) {
@@ -62,7 +91,7 @@ export async function seedCatalog(prisma) {
     {
       id: 'prod-thermal-paper',
       name: 'Thermal Receipt Paper Rolls',
-      type: 'CONSUMABLE',
+      type: 'GOODS',
       salesPrice: 1200,
       costPrice: 600,
       notes: 'Consumable paper rolls pack',

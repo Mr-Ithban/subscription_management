@@ -18,6 +18,9 @@ import PlansPage from './pages/catalog/PlansPage';
 import TaxesPage from './pages/catalog/TaxesPage';
 import DiscountsPage from './pages/catalog/DiscountsPage';
 import StaffList from './pages/staff/StaffList';
+import SubscriptionsPage from './pages/subscriptions/SubscriptionsPage';
+import TemplatesPage from './pages/subscriptions/TemplatesPage';
+import PaymentsPage from './pages/payments/PaymentsPage';
 import PageHeader from './components/PageHeader';
 import { useAuth } from './auth/useAuth';
 
@@ -61,9 +64,11 @@ export default function App() {
                 <Route index element={<WorkspaceIndex />} />
                 <Route path="reports/dashboard" element={<Dashboard />} />
                 <Route path="reports/subscriptions" element={<Subscriptions />} />
+                <Route path="subscriptions" element={<SubscriptionsPage />} />
+                <Route path="quotation-templates" element={<TemplatesPage />} />
                 <Route path="invoices" element={<BillingPage />} />
                 <Route path="invoices/:invoiceId/payments" element={<InvoicePayments />} />
-                <Route path="payments" element={<Navigate to="/app/reports/dashboard" replace />} />
+                <Route path="payments" element={<PaymentsPage />} />
                 <Route path="customers" element={<Navigate to="/app/reports/subscriptions" replace />} />
                 <Route path="catalog">
                   <Route index element={<Navigate to="/app/catalog/products" replace />} />
