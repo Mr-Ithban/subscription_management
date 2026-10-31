@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import HealthCard from '../components/HealthCard';
 import { Layers, ShieldCheck, Box, CreditCard, Receipt, FileText, UserCheck, Sparkles } from 'lucide-react';
 
@@ -51,6 +52,15 @@ export default function LandingPage() {
           <p className="text-sm sm:text-base text-slate-400">
             Engineered for Brightloop Software. A modern, enterprise-ready multi-tenant subscription engine built with Node.js, Express, PostgreSQL, Prisma, React, and Tailwind CSS.
           </p>
+          <div className="pt-2 flex justify-center">
+            <Link
+              to="/app/catalog/products"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
+            >
+              <Box className="w-4 h-4" />
+              <span>Launch Catalog Module &bull; Member 2</span>
+            </Link>
+          </div>
         </div>
 
         {/* Health Check Live Integration Card */}
