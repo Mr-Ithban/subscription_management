@@ -15,6 +15,8 @@ import subscriptionsRouter from './modules/subscriptions/subscriptions/routes.js
 import billingRouter from './modules/billing/routes.js';
 import invoicesRouter from './modules/billing/invoiceRoutes.js';
 import portalBillingRouter from './modules/billing/portalRoutes.js';
+import paymentsRouter, { createInvoicePaymentsRouter } from './modules/payments/routes.js';
+import reportsRouter from './modules/reports/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -66,6 +68,11 @@ app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/portal', portalBillingRouter);
+// Payment routes
+app.use('/api/payments', paymentsRouter);
+app.use('/api/invoices', createInvoicePaymentsRouter());
+// Reports routes
+app.use('/api/reports', reportsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);

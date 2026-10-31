@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -20,16 +20,16 @@ enum Role {
 }
 
 model User {
-  id                         String                @id @default(cuid())
-  email                      String                @unique
-  passwordHash               String
-  role                       Role                  @default(CUSTOMER)
-  resetTokenHash             String?
-  resetExpiry                DateTime?
-  createdAt                  DateTime              @default(now())
-  updatedAt                  DateTime              @updatedAt
-  customer                   Customer?
-  createdPayments            Payment[]
+  id                  String                @id @default(cuid())
+  email               String                @unique
+  passwordHash        String
+  role                Role                  @default(CUSTOMER)
+  resetTokenHash      String?
+  resetExpiry         DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  customer            Customer?
+  createdPayments     Payment[]
   subscriptionHistory SubscriptionHistory[]
 }
 
@@ -104,6 +104,8 @@ model Product {
   templateLines     TemplateLine[]
   subscriptionLines SubscriptionLine[]
   invoiceLines      InvoiceLine[]
+
+  @@index([name])
 }
 
 model ProductVariant {
@@ -250,6 +252,8 @@ model Subscription {
   @@index([planId])
   @@index([status])
   @@index([nextBillingDate])
+  @@index([status, planId])
+  @@index([customerId, status])
 }
 
 model SubscriptionLine {
@@ -304,6 +308,7 @@ model Invoice {
   taxTotal       Int               @default(0)
   discountTotal  Int               @default(0)
   total          Int
+  amountPaid     Int               @default(0)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   subscription   Subscription      @relation(fields: [subscriptionId], references: [id])
@@ -317,6 +322,8 @@ model Invoice {
   @@index([status])
   @@index([dueDate])
   @@index([subscriptionId])
+  @@index([status, dueDate])
+  @@index([customerId, status])
 }
 
 model InvoiceLine {
