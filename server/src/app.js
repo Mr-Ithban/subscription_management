@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import templatesRouter from './modules/subscriptions/templates/routes.js';
+import subscriptionsRouter from './modules/subscriptions/subscriptions/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -38,6 +39,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/quotation-templates', templatesRouter);
+app.use('/api/subscriptions', subscriptionsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
