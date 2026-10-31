@@ -1,5 +1,6 @@
 import HealthCard from '../components/HealthCard';
 import { Layers, ShieldCheck, Box, CreditCard, Receipt, FileText, UserCheck, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const modules = [
   { name: 'Auth Module', desc: 'JWT authentication, password hashing, RBAC', icon: ShieldCheck, path: 'src/modules/auth' },
@@ -29,6 +30,8 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-400">
+            <Link to="/login" className="rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800">Sign in</Link>
+            <Link to="/signup" className="rounded-lg bg-indigo-500 px-3 py-2 font-semibold text-white hover:bg-indigo-400">Create account</Link>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Scaffold Milestone (M1)
