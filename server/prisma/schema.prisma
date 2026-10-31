@@ -38,3 +38,110 @@ model Customer {
   address   String?
   createdAt DateTime @default(now())
 }
+
+// ===== CATALOG =====
+
+enum ProductType {
+  SERVICE
+  GOODS
+  SOFTWARE
+}
+
+enum BillingPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum PlanStatus {
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+enum DiscountType {
+  FIXED
+  PERCENT
+}
+
+enum DiscountAppliesTo {
+  PRODUCT
+  SUBSCRIPTION
+}
+
+model Tax {
+  id        String   @id @default(uuid())
+  name      String
+  rate      Decimal  @db.Decimal(5, 2)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id         String           @id @default(uuid())
+  name       String
+  type       ProductType
+  salesPrice Int
+  costPrice  Int
+  notes      String?
+  active     Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  variants   ProductVariant[]
+  discounts  Discount[]
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute  String
+  value      String
+  extraPrice Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([productId, attribute, value])
+}
+
+model Plan {
+  id              String        @id @default(uuid())
+  name            String
+  price           Int
+  billingPeriod   BillingPeriod
+  minQty          Int           @default(1)
+  startDate       DateTime
+  endDate         DateTime?
+  status          PlanStatus    @default(ACTIVE)
+  autoClose       Boolean       @default(false)
+  allowPause      Boolean       @default(true)
+  allowEarlyClose Boolean       @default(true)
+  allowRenew      Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Discount {
+  id          String            @id @default(uuid())
+  name        String
+  type        DiscountType
+  value       Int
+  minPurchase Int?
+  minQty      Int?
+  startDate   DateTime
+  endDate     DateTime
+  usageLimit  Int?
+  usedCount   Int               @default(0)
+  appliesTo   DiscountAppliesTo
+  productId   String?
+  product     Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
+  active      Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([endDate])
+}

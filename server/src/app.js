@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './modules/auth/routes.js';
+import productsRouter from './modules/catalog/products/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -47,6 +48,8 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRateLimit, authRoutes);
+// Catalog routes
+app.use('/api/products', productsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
