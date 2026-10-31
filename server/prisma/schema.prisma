@@ -66,7 +66,6 @@ enum PlanStatus {
 enum DiscountType {
   FIXED
   PERCENT
-  PERCENTAGE
 }
 
 enum DiscountAppliesTo {
