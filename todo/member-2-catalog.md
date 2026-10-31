@@ -102,7 +102,7 @@
 
 ---
 
-## [ ] M2-9: Catalog Seed Data
+## [x] M2-9: Catalog Seed Data
 - **Branch**: `feature/m2-catalog-seed`
 - **Scope**: `server/prisma/seed.js`, `docs/api.md`
 - **Entities**: 3 taxes, 6 products (including Odoo +560, Zoho +300), 4 plans, 3 discounts. Use upserts.

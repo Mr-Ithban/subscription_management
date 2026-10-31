@@ -42,7 +42,7 @@
 | **M2-6** | Discount rules (Admin only) | `feature/m2-discounts` | ✅ Done | `feat(catalog): add admin-only discount rules` |
 | **M2-7** | Discount applicability service | `feature/m2-discount-logic` | ✅ Done | `feat(catalog): add discount applicability and usage tracking service` |
 | **M2-8** | Catalog UI screens | `feature/m2-catalog-ui` | ✅ Done | `feat(client): add product, plan, tax and discount screens` |
-| **M2-9** | Catalog seed data | `feature/m2-catalog-seed` | ⏳ Pending | `feat(catalog): add catalog seed data` |
+| **M2-9** | Catalog seed data | `feature/m2-catalog-seed` | ✅ Done | `feat(catalog): add catalog seed data` |
 
 ---
 
