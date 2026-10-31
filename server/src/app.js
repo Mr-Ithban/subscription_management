@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './modules/auth/routes.js';
 import productsRouter from './modules/catalog/products/routes.js';
 import paymentsRouter, { createInvoicePaymentsRouter } from './modules/payments/routes.js';
+import reportsRouter from './modules/reports/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -54,6 +55,8 @@ app.use('/api/products', productsRouter);
 // Payment routes
 app.use('/api/payments', paymentsRouter);
 app.use('/api/invoices', createInvoicePaymentsRouter());
+// Reports routes
+app.use('/api/reports', reportsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);

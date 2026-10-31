@@ -47,3 +47,13 @@ default limit is 20 and the maximum is 100. Build the response with
 Errors use `{ "error": { "message": "...", "details": {} } }`. The `details` property is
 omitted when there are no additional details. Prisma unique-constraint errors return 409.
 Authentication endpoints are limited to 20 requests per 15 minutes per client.
+
+
+## Reports API (M4-4)
+
+Accessible by `ADMIN` and `STAFF`.
+
+- `GET /api/reports/summary?from&to`: aggregated finance summary (active subscription count, subscriptions by status, revenue, invoiced total, outstanding total, overdue count and amount, MRR estimate). Cached in-memory for 30 seconds.
+- `GET /api/reports/revenue?from&to&groupBy=day|week|month`: revenue grouped by day, week, or month.
+- `GET /api/reports/subscriptions?status&planId&customerId&page&limit`: filtered and paginated subscriptions list.
+- `GET /api/reports/overdue?page&limit&customerId&asOf`: overdue invoices with days overdue and remaining balance.
