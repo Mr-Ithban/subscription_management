@@ -62,7 +62,7 @@ export async function seedCatalog(prisma) {
     });
   }
 
-  // 2. Products (6 products)
+  // 2. Products: core catalog plus additional demo products
   const products = [
     {
       id: 'prod-accounting-suite',
@@ -112,6 +112,102 @@ export async function seedCatalog(prisma) {
       costPrice: 5000,
       notes: 'Advanced reporting and real-time BI analytics',
     },
+    {
+      id: 'prod-cloud-backup',
+      name: 'Cloud Backup Storage',
+      type: 'SOFTWARE',
+      salesPrice: 129900,
+      costPrice: 52000,
+      notes: 'Encrypted cloud backups with scheduled recovery points',
+    },
+    {
+      id: 'prod-team-workspace',
+      name: 'Team Collaboration Workspace',
+      type: 'SOFTWARE',
+      salesPrice: 89900,
+      costPrice: 34000,
+      notes: 'Shared workspace, chat, and project collaboration tools',
+    },
+    {
+      id: 'prod-secure-mail',
+      name: 'Secure Mail Suite',
+      type: 'SOFTWARE',
+      salesPrice: 59900,
+      costPrice: 21000,
+      notes: 'Business email with spam filtering and domain protection',
+    },
+    {
+      id: 'prod-crm-automation',
+      name: 'CRM Automation Pack',
+      type: 'SOFTWARE',
+      salesPrice: 149900,
+      costPrice: 62000,
+      notes: 'Sales pipeline automation and customer follow-up workflows',
+    },
+    {
+      id: 'prod-analytics-pro',
+      name: 'Data Analytics Pro',
+      type: 'SOFTWARE',
+      salesPrice: 199900,
+      costPrice: 78000,
+      notes: 'Advanced analytics dashboards and scheduled reporting',
+    },
+    {
+      id: 'prod-managed-database',
+      name: 'Managed Database Service',
+      type: 'SERVICE',
+      salesPrice: 179900,
+      costPrice: 98000,
+      notes: 'Managed database backups, monitoring, and maintenance',
+    },
+    {
+      id: 'prod-onboarding',
+      name: 'Onboarding and Migration',
+      type: 'SERVICE',
+      salesPrice: 249900,
+      costPrice: 132000,
+      notes: 'Guided setup and migration of customer business data',
+    },
+    {
+      id: 'prod-api-integration',
+      name: 'API Integration Pack',
+      type: 'SERVICE',
+      salesPrice: 99900,
+      costPrice: 46000,
+      notes: 'Implementation support for common third-party integrations',
+    },
+    {
+      id: 'prod-barcode-scanner',
+      name: 'Wireless Barcode Scanner',
+      type: 'GOODS',
+      salesPrice: 89900,
+      costPrice: 54000,
+      notes: 'Wireless scanner for retail and warehouse checkout',
+    },
+    {
+      id: 'prod-receipt-printer',
+      name: 'Thermal Receipt Printer',
+      type: 'GOODS',
+      salesPrice: 159900,
+      costPrice: 99000,
+      notes: 'Compact receipt printer for point-of-sale terminals',
+    },
+    {
+      id: 'prod-network-gateway',
+      name: 'Managed Network Gateway',
+      type: 'GOODS',
+      salesPrice: 259900,
+      costPrice: 172000,
+      notes: 'Secure branch gateway with remote monitoring support',
+    },
+    {
+      id: 'prod-success-workshop',
+      name: 'Customer Success Workshop',
+      type: 'SERVICE',
+      salesPrice: 79900,
+      costPrice: 35000,
+      notes: 'Remote product training and adoption planning session',
+    },
   ];
 
   for (const prod of products) {
@@ -137,7 +233,7 @@ export async function seedCatalog(prisma) {
     });
   }
 
-  // 3. Product Variants for Accounting Suite (Brand: Odoo +560, Brand: Zoho +300)
+  // 3. Product variants, including the accounting brand pricing example
   const variants = [
     {
       id: 'var-brand-odoo',
@@ -153,6 +249,11 @@ export async function seedCatalog(prisma) {
       value: 'Zoho',
       extraPrice: 300,
     },
+    { id: 'var-backup-premium', productId: 'prod-cloud-backup', attribute: 'Tier', value: 'Premium', extraPrice: 25000 },
+    { id: 'var-workspace-25', productId: 'prod-team-workspace', attribute: 'Seats', value: '25 users', extraPrice: 20000 },
+    { id: 'var-analytics-cloud', productId: 'prod-analytics-pro', attribute: 'Hosting', value: 'Cloud', extraPrice: 12000 },
+    { id: 'var-printer-bluetooth', productId: 'prod-receipt-printer', attribute: 'Connection', value: 'Bluetooth', extraPrice: 3000 },
+    { id: 'var-gateway-advanced', productId: 'prod-network-gateway', attribute: 'License', value: 'Advanced', extraPrice: 45000 },
   ];
 
   for (const v of variants) {

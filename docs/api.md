@@ -79,10 +79,24 @@ Prices are stored as integers in smallest currency units (e.g., 10000 = 100.00).
 | `prod-thermal-paper` | Thermal Receipt Paper Rolls | `GOODS` | 1200 | 600 | 50-roll pack consumable supplies |
 | `prod-priority-support` | 24/7 Priority Support SLA | `SERVICE` | 8000 | 3000 | Enterprise technical support SLA |
 | `prod-analytics-dashboard` | Executive Analytics Addon | `SERVICE` | 15000 | 5000 | Real-time BI reporting and analytics |
+| `prod-cloud-backup` | Cloud Backup Storage | `SOFTWARE` | 129900 | 52000 | Encrypted scheduled cloud backups |
+| `prod-team-workspace` | Team Collaboration Workspace | `SOFTWARE` | 89900 | 34000 | Shared workspace and project tools |
+| `prod-secure-mail` | Secure Mail Suite | `SOFTWARE` | 59900 | 21000 | Business email and domain protection |
+| `prod-crm-automation` | CRM Automation Pack | `SOFTWARE` | 149900 | 62000 | Sales pipeline and follow-up workflows |
+| `prod-analytics-pro` | Data Analytics Pro | `SOFTWARE` | 199900 | 78000 | Advanced dashboards and reporting |
+| `prod-managed-database` | Managed Database Service | `SERVICE` | 179900 | 98000 | Managed backups and monitoring |
+| `prod-onboarding` | Onboarding and Migration | `SERVICE` | 249900 | 132000 | Guided customer setup and data migration |
+| `prod-api-integration` | API Integration Pack | `SERVICE` | 99900 | 46000 | Common third-party integration support |
+| `prod-barcode-scanner` | Wireless Barcode Scanner | `GOODS` | 89900 | 54000 | Wireless retail and warehouse scanner |
+| `prod-receipt-printer` | Thermal Receipt Printer | `GOODS` | 159900 | 99000 | Compact point-of-sale printer |
+| `prod-network-gateway` | Managed Network Gateway | `GOODS` | 259900 | 172000 | Secure monitored branch gateway |
+| `prod-success-workshop` | Customer Success Workshop | `SERVICE` | 79900 | 35000 | Remote product training session |
 
 #### Product Variants (`prod-accounting-suite`)
 - `var-brand-odoo`: Attribute `Brand`, Value `Odoo`, Extra Price `560` (Total: 10560)
 - `var-brand-zoho`: Attribute `Brand`, Value `Zoho`, Extra Price `300` (Total: 10300)
+
+Other demo variants include Premium cloud backup (+25000), a 25-user collaboration tier (+20000), cloud-hosted analytics (+12000), Bluetooth receipt printing (+3000), and an advanced network gateway license (+45000).
 
 ### 3. Plans
 
