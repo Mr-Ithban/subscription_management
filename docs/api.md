@@ -47,3 +47,10 @@ default limit is 20 and the maximum is 100. Build the response with
 Errors use `{ "error": { "message": "...", "details": {} } }`. The `details` property is
 omitted when there are no additional details. Prisma unique-constraint errors return 409.
 Authentication endpoints are limited to 20 requests per 15 minutes per client.
+
+## Staff administration
+
+`POST /api/staff` and `GET /api/staff?page=1&limit=20` require an ADMIN bearer token.
+Create body: `{ "name": "Sam Staff", "email": "sam@example.test", "password": "StrongPass!" }`.
+The password must contain at least 9 characters, uppercase and lowercase letters, and a special character.
+The list returns `{ "data": [], "page": 1, "limit": 20, "total": 0 }`; password hashes are never returned.

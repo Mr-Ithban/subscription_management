@@ -1,0 +1,2 @@
+const styles = { ACTIVE: 'bg-emerald-500/10 text-emerald-300', PAUSED: 'bg-amber-500/10 text-amber-300', CLOSED: 'bg-slate-700 text-slate-300', STAFF: 'bg-cyan-500/10 text-cyan-300', ADMIN: 'bg-violet-500/10 text-violet-300', CUSTOMER: 'bg-indigo-500/10 text-indigo-300' };
+export default function StatusBadge({ status }) { return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${styles[status] || 'bg-slate-700 text-slate-300'}`}>{status}</span>; }

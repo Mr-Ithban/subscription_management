@@ -7,6 +7,7 @@ const nav = [
   { to: '/portal/subscriptions', label: 'Subscriptions' },
   { to: '/portal/invoices', label: 'Invoices' },
   { to: '/portal/payments', label: 'Payments' },
+  { to: '/portal/profile', label: 'My profile' },
 ];
 
 export default function PortalLayout() {

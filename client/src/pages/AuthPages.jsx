@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { requestPasswordReset, resetPassword } from '../api/auth';
@@ -25,7 +25,7 @@ function errorMessage(error) {
 }
 
 function destination(role) {
-  return role === 'ADMIN' ? '/admin' : role === 'STAFF' ? '/staff' : '/portal';
+  return role === 'ADMIN' || role === 'STAFF' ? '/app' : '/portal';
 }
 
 export function LoginPage() {
@@ -45,6 +45,13 @@ export function LoginPage() {
 
 export function SignupPage() {
   const { signup } = useAuth(); const navigate = useNavigate(); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
+  const [password, setPassword] = useState('');
+  const passwordRules = useMemo(() => [
+    ['At least 9 characters', password.length >= 9],
+    ['One uppercase letter', /[A-Z]/.test(password)],
+    ['One lowercase letter', /[a-z]/.test(password)],
+    ['One special character', /[^A-Za-z0-9]/.test(password)],
+  ], [password]);
   async function submit(event) {
     event.preventDefault(); setError(''); setBusy(true);
     const values = Object.fromEntries(new FormData(event.currentTarget));
@@ -52,7 +59,7 @@ export function SignupPage() {
     catch (err) { setError(errorMessage(err)); }
     finally { setBusy(false); }
   }
-  return <AuthFrame title="Create your account"><form className="mt-6 grid gap-4" onSubmit={submit}><Message error={error} /><Field label="Name" name="name" autoComplete="name" /><Field label="Email" name="email" type="email" autoComplete="email" /><Field label="Password (9+ characters, uppercase, lowercase and a special character)" name="password" type="password" autoComplete="new-password" minLength={9} /><Submit>{busy ? 'Creating account…' : 'Create account'}</Submit></form><p className="mt-5 text-sm text-slate-400">Already registered? <Link className="text-indigo-300" to="/login">Sign in</Link></p></AuthFrame>;
+  return <AuthFrame title="Create your account"><form className="mt-6 grid gap-4" onSubmit={submit}><Message error={error} /><Field label="Name" name="name" autoComplete="name" /><Field label="Email" name="email" type="email" autoComplete="email" /><label className="grid gap-1.5 text-sm text-slate-300">Password<input className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-indigo-400" name="password" type="password" autoComplete="new-password" required value={password} onChange={(event) => setPassword(event.target.value)} /><span className="mt-1 grid grid-cols-2 gap-1 text-xs">{passwordRules.map(([label, valid]) => <span key={label} className={valid ? 'text-emerald-300' : 'text-slate-500'}>{valid ? '✓' : '○'} {label}</span>)}</span></label><Submit>{busy ? 'Creating account…' : 'Create account'}</Submit></form><p className="mt-5 text-sm text-slate-400">Already registered? <Link className="text-indigo-300" to="/login">Sign in</Link></p></AuthFrame>;
 }
 
 export function ForgotPasswordPage() {
