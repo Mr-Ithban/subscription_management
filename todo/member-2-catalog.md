@@ -83,7 +83,7 @@
 
 ---
 
-## [ ] M2-7: Discount Applicability Service
+## [x] M2-7: Discount Applicability Service
 - **Branch**: `feature/m2-discount-logic`
 - **Scope**: `src/modules/catalog/discountService.js`
 - **Exports**:
