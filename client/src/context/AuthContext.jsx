@@ -8,6 +8,7 @@ import {
   signupRequest,
   storeToken,
 } from '../api/auth';
+export { useAuth } from '../auth/useAuth';
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState({ user: null, customer: null, loading: true });

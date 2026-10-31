@@ -36,13 +36,13 @@
 |---|---|---|:---:|---|
 | **M2-1** | Catalog schema | `feature/m2-catalog-schema` | ✅ Done | `feat(catalog): add catalog, plan and discount prisma models` |
 | **M2-2** | Products & variants | `feature/m2-products` | ✅ Done | `feat(catalog): add product and variant endpoints with pricing helper` |
-| **M2-3** | Plans & billing period helper | `feature/m2-plans` | ⏳ Pending | `feat(catalog): add plan endpoints and billing period helper` |
-| **M2-4** | Plan actions & auto-close job | `feature/m2-plan-actions` | ⏳ Pending | `feat(catalog): add plan pause, close and renew actions with auto-close job` |
-| **M2-5** | Taxes & calculation helpers | `feature/m2-taxes` | ⏳ Pending | `feat(catalog): add tax rules and tax calculation helpers` |
-| **M2-6** | Discount rules (Admin only) | `feature/m2-discounts` | ⏳ Pending | `feat(catalog): add admin-only discount rules` |
-| **M2-7** | Discount applicability service | `feature/m2-discount-logic` | ⏳ Pending | `feat(catalog): add discount applicability and usage tracking service` |
-| **M2-8** | Catalog UI screens | `feature/m2-catalog-ui` | ⏳ Pending | `feat(client): add product, plan, tax and discount screens` |
-| **M2-9** | Catalog seed data | `feature/m2-catalog-seed` | ⏳ Pending | `feat(catalog): add catalog seed data` |
+| **M2-3** | Plans & billing period helper | `feature/m2-plans` | ✅ Done | `feat(catalog): add plan endpoints and billing period helper` |
+| **M2-4** | Plan actions & auto-close job | `feature/m2-plan-actions` | ✅ Done | `feat(catalog): add plan pause, close and renew actions with auto-close job` |
+| **M2-5** | Taxes & calculation helpers | `feature/m2-taxes` | ✅ Done | `feat(catalog): add tax rules and tax calculation helpers` |
+| **M2-6** | Discount rules (Admin only) | `feature/m2-discounts` | ✅ Done | `feat(catalog): add admin-only discount rules` |
+| **M2-7** | Discount applicability service | `feature/m2-discount-logic` | ✅ Done | `feat(catalog): add discount applicability and usage tracking service` |
+| **M2-8** | Catalog UI screens | `feature/m2-catalog-ui` | ✅ Done | `feat(client): add product, plan, tax and discount screens` |
+| **M2-9** | Catalog seed data | `feature/m2-catalog-seed` | ✅ Done | `feat(catalog): add catalog seed data` |
 
 ---
 

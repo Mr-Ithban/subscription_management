@@ -53,4 +53,182 @@ Authentication endpoints are limited to 20 requests per 15 minutes per client.
 `POST /api/staff` and `GET /api/staff?page=1&limit=20` require an ADMIN bearer token.
 Create body: `{ "name": "Sam Staff", "email": "sam@example.test", "password": "StrongPass!" }`.
 The password must contain at least 9 characters, uppercase and lowercase letters, and a special character.
-The list returns `{ "data": [], "page": 1, "limit": 20, "total": 0 }`; password hashes are never returned.
+Staff lists return `{ "data": [], "page": 1, "limit": 20, "total": 0 }` without password hashes.
+
+## Seeded Catalog Entities (Member 2)
+
+The database seed (`npm run seed` or `node prisma/seed.js`) populates baseline catalog data using deterministic IDs and idempotent upserts. Other modules (Member 3: Subscriptions/Billing, Member 4: Payments/Invoices) can safely reference these seeded entities:
+
+### 1. Taxes
+
+| ID | Name | Rate (%) | Active | Usage |
+|---|---|---:|:---:|---|
+| `tax-5` | GST 5% | 5.0 | Yes | Low-tier goods & services |
+| `tax-12` | GST 12% | 12.0 | Yes | Standard rate consumables |
+| `tax-18` | GST 18% | 18.0 | Yes | Software, cloud services, and subscriptions |
+
+### 2. Products and Variants
+
+Prices are stored as integers in smallest currency units (e.g., 10000 = 100.00).
+
+| ID | Name | Type | Sales Price | Cost Price | Variants / Notes |
+|---|---|---|---:|---:|---|
+| `prod-accounting-suite` | Accounting Suite | `SERVICE` | 10000 | 6000 | Brand variants: `Odoo` (+560 -> 10560), `Zoho` (+300 -> 10300) |
+| `prod-cloud-hosting` | Cloud Hosting Infrastructure | `SERVICE` | 25000 | 15000 | Dedicated compute/storage server instances |
+| `prod-pos-terminal` | Smart POS Terminal | `GOODS` | 45000 | 30000 | Hardware terminal device |
+| `prod-thermal-paper` | Thermal Receipt Paper Rolls | `CONSUMABLE` | 1200 | 600 | 50-roll pack consumable supplies |
+| `prod-priority-support` | 24/7 Priority Support SLA | `SERVICE` | 8000 | 3000 | Enterprise technical support SLA |
+| `prod-analytics-dashboard` | Executive Analytics Addon | `SERVICE` | 15000 | 5000 | Real-time BI reporting and analytics |
+
+#### Product Variants (`prod-accounting-suite`)
+- `var-brand-odoo`: Attribute `Brand`, Value `Odoo`, Extra Price `560` (Total: 10560)
+- `var-brand-zoho`: Attribute `Brand`, Value `Zoho`, Extra Price `300` (Total: 10300)
+
+### 3. Plans
+
+All seeded plans are initialized with `status: ACTIVE`, `minQty: 1`, `allowPause: true`, `allowEarlyClose: true`, `allowRenew: true`, and `autoClose: false`.
+
+| ID | Name | Billing Period | Price | Linked Product |
+|---|---|---|---:|---|
+| `plan-daily-starter` | Daily Pass | `DAILY` | 499 | `prod-accounting-suite` |
+| `plan-weekly-growth` | Weekly Growth | `WEEKLY` | 1999 | `prod-cloud-hosting` |
+| `plan-monthly-pro` | Pro Monthly | `MONTHLY` | 4999 | `prod-accounting-suite` |
+| `plan-yearly-enterprise` | Enterprise Annual | `YEARLY` | 49999 | `prod-cloud-hosting` |
+
+### 4. Discounts
+
+| ID | Name | Type | Value | Scope | Product ID | Status / Condition |
+|---|---|---|---:|---|---|---|
+| `disc-sub-10` | 10% Sitewide Subscription Discount | `PERCENT` | 10 | `SUBSCRIPTION` | — | Active (min purchase 1000) |
+| `disc-prod-fixed-200` | Fixed 200 Off Accounting Suite | `FIXED` | 200 | `PRODUCT` | `prod-accounting-suite` | Active (min purchase 500, limit 500) |
+| `disc-expired-blackfriday` | Expired Early Bird Promo | `PERCENT` | 25 | `SUBSCRIPTION` | — | Expired (ended 2023-12-31) |
+
+## Reports API (M4-4)
+
+Accessible by `ADMIN` and `STAFF`.
+
+- `GET /api/reports/summary?from&to`: aggregated finance summary (active subscription count, subscriptions by status, revenue, invoiced total, outstanding total, overdue count and amount, MRR estimate). Cached in-memory for 30 seconds.
+- `GET /api/reports/revenue?from&to&groupBy=day|week|month`: revenue grouped by day, week, or month.
+- `GET /api/reports/subscriptions?status&planId&customerId&page&limit`: filtered and paginated subscriptions list.
+- `GET /api/reports/overdue?page&limit&customerId&asOf`: overdue invoices with days overdue and remaining balance.
+
+---
+
+## Auth API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/signup` | public | Register new user. Body: `{ email, password, name, role? }` |
+| POST | `/api/auth/login` | public | Login. Body: `{ email, password }`. Returns `{ token, user }` |
+| POST | `/api/auth/forgot-password` | public | Send reset email. Body: `{ email }` |
+| POST | `/api/auth/reset-password` | public | Reset password. Body: `{ token, password }` |
+| GET | `/api/auth/me` | Bearer | Current user info |
+
+---
+
+## Products API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/products` | ADMIN, STAFF | List products. Query: `?page&limit&search` |
+| POST | `/api/products` | ADMIN | Create product. Body: `{ name, type, salesPrice, costPrice?, notes? }` |
+| GET | `/api/products/:id` | ADMIN, STAFF | Get single product |
+| PUT | `/api/products/:id` | ADMIN | Update product |
+| DELETE | `/api/products/:id` | ADMIN | Soft-delete product |
+| POST | `/api/products/:id/variants` | ADMIN | Add variant. Body: `{ attribute, value, extraPrice }` |
+
+---
+
+## Payments API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/payments` | ADMIN, STAFF | List all payments. Query: `?page&limit&invoiceId` |
+| GET | `/api/invoices/:id/payments` | ADMIN, STAFF | List payments for invoice |
+| POST | `/api/invoices/:id/payments` | ADMIN, STAFF | Record payment. Body: `{ method, amount, paidAt, note? }` |
+
+### Payment methods
+`CARD` `UPI` `BANK_TRANSFER` `CASH` `CHEQUE` `ONLINE`
+
+### Record Payment example
+```http
+POST /api/invoices/inv_123/payments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "method": "UPI",
+  "amount": 59900,
+  "paidAt": "2026-10-31T10:00:00.000Z",
+  "note": "UPI ref: 1234567890"
+}
+```
+Response `201`:
+```json
+{
+  "id": "pmt_abc",
+  "invoiceId": "inv_123",
+  "method": "UPI",
+  "amount": 59900,
+  "paidAt": "2026-10-31T10:00:00.000Z",
+  "note": "UPI ref: 1234567890"
+}
+```
+
+---
+
+## Portal API (Customer only)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/portal/payments` | CUSTOMER | Paginated payments scoped to logged-in customer. Query: `?page&limit` |
+
+---
+
+## Reports API (detailed)
+
+### GET /api/reports/summary
+
+Query params: `from` (ISO date), `to` (ISO date)
+
+Response (200):
+```json
+{
+  "activeSubscriptionCount": 42,
+  "subscriptionsByStatus": { "ACTIVE": 42, "CONFIRMED": 8 },
+  "revenue": 1250000,
+  "invoicedTotal": 1800000,
+  "outstandingTotal": 550000,
+  "overdueCount": 5,
+  "overdueAmount": 125000,
+  "mrr": 208333
+}
+```
+
+### GET /api/reports/revenue
+
+Query params: `groupBy=day|week|month`, `from`, `to`
+
+Response (200):
+```json
+{
+  "groupBy": "month",
+  "totalRevenue": 1250000,
+  "breakdown": [
+    { "period": "2026-09", "revenue": 620000 },
+    { "period": "2026-10", "revenue": 630000 }
+  ]
+}
+```
+
+### GET /api/reports/subscriptions
+
+Query params: `status`, `planId`, `customerId`, `page`, `limit`
+
+Response (200): `{ data: [...], page, limit, total }`
+
+### GET /api/reports/overdue
+
+Query params: `page`, `limit`, `customerId`, `asOf` (ISO date, default: today)
+
+Response (200): `{ data: [{ id, number, dueDate, daysOverdue, remainingBalance, status, customer }], page, limit, total }`

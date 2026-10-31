@@ -26,7 +26,7 @@
 
 ---
 
-## [ ] M2-3: Plans and Billing Period Helper
+## [x] M2-3: Plans and Billing Period Helper
 - **Branch**: `feature/m2-plans`
 - **Scope**: `server/src/modules/catalog/plans`, `server/src/modules/catalog/billingPeriod.js`
 - **Requirements**:
@@ -44,7 +44,7 @@
 
 ---
 
-## [ ] M2-4: Plan Pause, Close, Renew and Auto-Close
+## [x] M2-4: Plan Pause, Close, Renew and Auto-Close
 - **Branch**: `feature/m2-plan-actions`
 - **Scope**: `server/src/modules/catalog/plans`, `server/src/jobs/`
 - **Requirements**:
@@ -58,7 +58,7 @@
 
 ---
 
-## [ ] M2-5: Taxes
+## [x] M2-5: Taxes
 - **Branch**: `feature/m2-taxes`
 - **Scope**: `server/src/modules/catalog/taxes`, `server/src/modules/catalog/tax.js`
 - **Requirements**:
@@ -71,7 +71,7 @@
 
 ---
 
-## [ ] M2-6: Discount Rules (Admin Only)
+## [x] M2-6: Discount Rules (Admin Only)
 - **Branch**: `feature/m2-discounts`
 - **Scope**: `server/src/modules/catalog/discounts`
 - **Requirements**:
@@ -83,7 +83,7 @@
 
 ---
 
-## [ ] M2-7: Discount Applicability Service
+## [x] M2-7: Discount Applicability Service
 - **Branch**: `feature/m2-discount-logic`
 - **Scope**: `src/modules/catalog/discountService.js`
 - **Exports**:
@@ -94,7 +94,7 @@
 
 ---
 
-## [ ] M2-8: Catalog UI
+## [x] M2-8: Catalog UI
 - **Branch**: `feature/m2-catalog-ui`
 - **Scope**: `client/src/pages/catalog/`
 - **Screens**: Products (with variant editor), Plans (with action buttons), Taxes, Discounts.
@@ -102,7 +102,7 @@
 
 ---
 
-## [ ] M2-9: Catalog Seed Data
+## [x] M2-9: Catalog Seed Data
 - **Branch**: `feature/m2-catalog-seed`
 - **Scope**: `server/prisma/seed.js`, `docs/api.md`
 - **Entities**: 3 taxes, 6 products (including Odoo +560, Zoho +300), 4 plans, 3 discounts. Use upserts.

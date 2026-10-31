@@ -1,4 +1,113 @@
-export default function DataTable({ columns, rows, page = 1, limit = 20, total = 0, onPageChange, emptyMessage = 'No records found.' }) {
-  const pages = Math.max(1, Math.ceil(total / limit));
-  return <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60"><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-900 text-xs uppercase tracking-wide text-slate-400"><tr>{columns.map((column) => <th key={column.key} className="px-4 py-3">{column.label}</th>)}</tr></thead><tbody className="divide-y divide-slate-800">{rows.length ? rows.map((row, index) => <tr key={row.id || index} className="text-slate-200">{columns.map((column) => <td key={column.key} className="px-4 py-3">{column.render ? column.render(row) : row[column.key] ?? '—'}</td>)}</tr>) : <tr><td className="px-4 py-8 text-center text-slate-500" colSpan={columns.length}>{emptyMessage}</td></tr>}</tbody></table></div><div className="flex items-center justify-between border-t border-slate-800 px-4 py-3 text-xs text-slate-400"><span>{total} records · Page {page} of {pages}</span><div className="flex gap-2"><button className="rounded border border-slate-700 px-3 py-1.5 disabled:opacity-40" disabled={page <= 1} onClick={() => onPageChange?.(page - 1)}>Previous</button><button className="rounded border border-slate-700 px-3 py-1.5 disabled:opacity-40" disabled={page >= pages} onClick={() => onPageChange?.(page + 1)}>Next</button></div></div></div>;
+import React from 'react';
+
+export default function DataTable({
+  columns = [],
+  data = [],
+  rows,
+  isLoading = false,
+  emptyMessage = 'No records found',
+  pagination,
+  page,
+  limit,
+  total,
+  onPageChange,
+}) {
+  const records = rows ?? data;
+  const pageInfo = pagination ?? (rows ? { page: page || 1, limit: limit || 20, total: total || 0 } : null);
+  const totalPages = pageInfo ? Math.ceil((pageInfo.total || 0) / (pageInfo.limit || 20)) : 1;
+  const currentPage = pageInfo?.page || 1;
+
+  if (isLoading) {
+    return (
+      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-full"></div>
+          <div className="h-10 bg-gray-100 rounded w-full"></div>
+          <div className="h-10 bg-gray-100 rounded w-full"></div>
+          <div className="h-10 bg-gray-100 rounded w-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-300">
+          <thead className="bg-gray-50">
+            <tr>
+              {columns.map((col, idx) => (
+                <th
+                  key={col.key || col.accessor || idx}
+                  scope="col"
+                  className={`py-3.5 px-4 text-left text-xs font-semibold text-gray-900 ${
+                    col.className || ''
+                  }`}
+                >
+                  {col.header || col.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {records.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="py-8 px-4 text-center text-sm text-gray-500"
+                >
+                  {emptyMessage}
+                </td>
+              </tr>
+            ) : (
+              records.map((row, rowIdx) => (
+                <tr key={row.id || rowIdx} className="hover:bg-gray-50 transition-colors">
+                  {columns.map((col, colIdx) => (
+                    <td
+                      key={col.key || col.accessor || colIdx}
+                      className={`whitespace-nowrap py-3 px-4 text-sm text-gray-700 ${
+                        col.className || ''
+                      }`}
+                    >
+                      {col.render ? col.render(row) : row[col.accessor || col.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {pageInfo && pageInfo.total > 0 && (
+        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+          <div className="text-sm text-gray-700">
+            Showing <span className="font-medium">{(currentPage - 1) * pageInfo.limit + 1}</span>{' '}
+            to{' '}
+            <span className="font-medium">
+              {Math.min(currentPage * pageInfo.limit, pageInfo.total)}
+            </span>{' '}
+            of <span className="font-medium">{pageInfo.total}</span> results
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => onPageChange && onPageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="relative inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => onPageChange && onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="relative inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
+
