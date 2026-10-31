@@ -1,8 +1,8 @@
 const roles = new Set(['ADMIN', 'STAFF', 'CUSTOMER']);
 
-export function authorizeRoles(...allowedRoles) {
+export function authorize(...allowedRoles) {
   if (allowedRoles.length === 0 || allowedRoles.some((role) => !roles.has(role))) {
-    throw new TypeError('authorizeRoles requires one or more valid roles');
+    throw new TypeError('authorize requires one or more valid roles');
   }
 
   const allowed = new Set(allowedRoles);

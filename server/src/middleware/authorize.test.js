@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import { jest } from '@jest/globals';
 import { createAuthenticate } from './authenticate.js';
-import { authorizeRoles } from './authorize.js';
+import { authorize } from './authorize.js';
 
 const secret = 'test-only-rbac-secret';
 
@@ -15,7 +15,7 @@ function createProtectedApp(role, allowedRoles) {
   app.get(
     '/protected',
     createAuthenticate(prisma),
-    authorizeRoles(...allowedRoles),
+    authorize(...allowedRoles),
     (req, res) => res.status(200).json({ id: req.user.id, role: req.user.role })
   );
 
@@ -30,7 +30,7 @@ beforeEach(() => {
   process.env.JWT_SECRET = secret;
 });
 
-describe('authorizeRoles middleware', () => {
+describe('authorize middleware', () => {
   it('allows an ADMIN on an ADMIN-only route', async () => {
     const app = createProtectedApp('ADMIN', ['ADMIN']);
     const response = await request(app)
@@ -66,7 +66,7 @@ describe('authorizeRoles middleware', () => {
   });
 
   it('rejects empty or unknown role policies at route setup', () => {
-    expect(() => authorizeRoles()).toThrow('authorizeRoles requires one or more valid roles');
-    expect(() => authorizeRoles('OWNER')).toThrow('authorizeRoles requires one or more valid roles');
+    expect(() => authorize()).toThrow('authorize requires one or more valid roles');
+    expect(() => authorize('OWNER')).toThrow('authorize requires one or more valid roles');
   });
 });

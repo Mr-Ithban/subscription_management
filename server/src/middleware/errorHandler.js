@@ -1,15 +1,21 @@
-/**
- * Central error-handling middleware.
- * Catches unhandled errors and returns consistent JSON response.
- */
 export const errorHandler = (err, req, res, _next) => {
-  const statusCode = err.statusCode || err.status || 500;
-  const message = err.message || 'Internal Server Error';
+  const isUniqueConstraint = err.code === 'P2002';
+  const statusCode = isUniqueConstraint ? 409 : err.statusCode || err.status || 500;
+  const message = isUniqueConstraint
+    ? 'A record with these values already exists'
+    : statusCode >= 500
+      ? 'Internal Server Error'
+      : err.message || 'Request failed';
+  const details = isUniqueConstraint
+    ? err.meta?.target
+      ? { fields: err.meta.target }
+      : undefined
+    : err.details;
 
-  res.status(statusCode).json({
-    status: 'error',
-    statusCode,
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  return res.status(statusCode).json({
+    error: {
+      message,
+      ...(details === undefined ? {} : { details }),
+    },
   });
 };
