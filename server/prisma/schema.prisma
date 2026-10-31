@@ -1,0 +1,11 @@
+// Prisma schema for Brightloop Software Subscription Management System
+// Datasource and generator configuration only (business models owned by feature teams)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
