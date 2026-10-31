@@ -60,6 +60,21 @@ enum PlanStatus {
   CLOSED
 }
 
+enum SubscriptionStatus {
+  DRAFT
+  QUOTATION
+  CONFIRMED
+  ACTIVE
+  CLOSED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
 enum DiscountType {
   FIXED
   PERCENT
@@ -144,4 +159,177 @@ model Discount {
   updatedAt   DateTime          @updatedAt
 
   @@index([endDate])
+}
+
+enum BillingRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model QuotationTemplate {
+  id           String         @id @default(cuid())
+  name         String
+  validityDays Int
+  planId       String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  lines        TemplateLine[]
+
+  @@index([planId])
+}
+
+model TemplateLine {
+  id         String            @id @default(cuid())
+  templateId String
+  productId  String
+  variantId  String?
+  quantity   Int               @default(1)
+  unitPrice  Int
+  taxId      String?
+  template   QuotationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([templateId])
+  @@index([productId])
+  @@index([variantId])
+  @@index([taxId])
+}
+
+model Subscription {
+  id              String                @id @default(cuid())
+  number          String                @unique
+  customerId      String
+  planId          String
+  startDate       DateTime
+  expiryDate      DateTime?
+  paymentTerms    Int                   @default(0)
+  status          SubscriptionStatus    @default(DRAFT)
+  nextBillingDate DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  lines           SubscriptionLine[]
+  history         SubscriptionHistory[]
+  invoices        Invoice[]
+  discounts       InvoiceDiscount[]
+
+  @@index([customerId])
+  @@index([planId])
+  @@index([status])
+  @@index([nextBillingDate])
+}
+
+model SubscriptionLine {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  productId      String
+  variantId      String?
+  quantity       Int          @default(1)
+  unitPrice      Int
+  taxId          String?
+  amount         Int
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([subscriptionId])
+  @@index([productId])
+  @@index([variantId])
+  @@index([taxId])
+}
+
+model SubscriptionHistory {
+  id             String              @id @default(cuid())
+  subscriptionId String
+  fromStatus     SubscriptionStatus?
+  toStatus       SubscriptionStatus
+  changedById    String?
+  note           String?
+  createdAt      DateTime            @default(now())
+  subscription   Subscription        @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
+  @@index([changedById])
+}
+
+model Invoice {
+  id             String            @id @default(cuid())
+  number         String            @unique
+  subscriptionId String
+  customerId     String
+  status         InvoiceStatus     @default(DRAFT)
+  periodStart    DateTime
+  periodEnd      DateTime
+  issueDate      DateTime          @default(now())
+  dueDate        DateTime
+  subtotal       Int
+  taxTotal       Int               @default(0)
+  discountTotal  Int               @default(0)
+  total          Int
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  subscription   Subscription      @relation(fields: [subscriptionId], references: [id])
+  lines          InvoiceLine[]
+  discounts      InvoiceDiscount[]
+
+  // Billing periods are half-open [periodStart, periodEnd); this prevents duplicate runs.
+  @@unique([subscriptionId, periodStart])
+  @@index([customerId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([subscriptionId])
+}
+
+model InvoiceLine {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  productId   String?
+  variantId   String?
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Int
+  taxId       String?
+  taxAmount   Int      @default(0)
+  amount      Int
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@index([variantId])
+  @@index([taxId])
+}
+
+model InvoiceDiscount {
+  id             String        @id @default(cuid())
+  invoiceId      String
+  discountId     String
+  subscriptionId String?
+  name           String
+  type           DiscountType
+  value          Int
+  amount         Int
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@index([discountId])
+  @@index([subscriptionId])
+}
+
+model BillingRun {
+  id                String           @id @default(cuid())
+  status            BillingRunStatus @default(RUNNING)
+  startedAt         DateTime         @default(now())
+  completedAt       DateTime?
+  subscriptionsSeen Int              @default(0)
+  invoicesCreated   Int              @default(0)
+  invoicesSkipped   Int              @default(0)
+  errorCount        Int              @default(0)
+  errorMessage      String?
+
+  @@index([status, startedAt])
+  @@index([startedAt])
 }
