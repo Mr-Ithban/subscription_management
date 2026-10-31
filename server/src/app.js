@@ -10,6 +10,7 @@ import productsRouter from './modules/catalog/products/routes.js';
 import templatesRouter from './modules/subscriptions/templates/routes.js';
 import subscriptionsRouter from './modules/subscriptions/subscriptions/routes.js';
 import billingRouter from './modules/billing/routes.js';
+import invoicesRouter from './modules/billing/invoiceRoutes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -56,6 +57,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/quotation-templates', templatesRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/invoices', invoicesRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
