@@ -1,13 +1,34 @@
-/**
- * Prisma database seed placeholder for Brightloop Software Subscription Management System.
- * Business models and seed data will be implemented by milestone feature teams.
- */
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import { fileURLToPath } from 'node:url';
 
-async function main() {
-  // Placeholder: No models implemented in scaffold milestone
+export async function seedAuth(prisma) {
+  const passwordHash = await bcrypt.hash('Admin@12345', 10);
+
+  return prisma.user.upsert({
+    where: { email: 'admin@brightloop.test' },
+    update: {},
+    create: {
+      email: 'admin@brightloop.test',
+      passwordHash,
+      role: 'ADMIN',
+    },
+  });
 }
 
-main().catch((e) => {
-  console.error('Database seed error:', e);
-  process.exit(1);
-});
+async function main() {
+  const prisma = new PrismaClient();
+
+  try {
+    await seedAuth(prisma);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main().catch((error) => {
+    console.error('Database seed error:', error);
+    process.exit(1);
+  });
+}
