@@ -16,29 +16,29 @@ This system replaces all of that with one backend and web app that covers the fu
 
 | Area | Requirement | Status |
 |---|---|---|
-| Signup | Email is unique per account | ☐ |
-| Signup | Password longer than 8 characters, with an uppercase letter, a lowercase letter and a special character | ☐ |
-| Auth | Forgot password sends a reset link to the registered email (expiring token) | ☐ |
-| RBAC | Admin controls everything; only Admin can add staff | ☐ |
-| RBAC | Staff have limited access to day-to-day work | ☐ |
-| RBAC | Customers see only their own subscriptions and invoices (portal) | ☐ |
-| Catalog | Products with name, type, sales price, cost price, notes | ☐ |
-| Catalog | Variants (e.g. Brand = Odoo adds 560 to the price) | ☐ |
-| Plans | Price, billing period (daily/weekly/monthly/yearly), minimum quantity, availability dates | ☐ |
-| Plans | Per-plan options: auto-close on end, close early, pause, renew | ☐ |
-| Templates | Quotation templates with plan and product lines and a validity in days | ☐ |
-| Subscriptions | Unique number, customer, plan, start/expiry date, payment terms, lines | ☐ |
-| Subscriptions | Lifecycle Draft → Quotation → Confirmed → Active → Closed, visible to the team | ☐ |
-| Billing | Invoices generated from subscriptions with customer, lines, taxes, totals prefilled | ☐ |
-| Billing | Never billed twice, never skipped (idempotent billing job) | ☐ |
-| Taxes | Calculated automatically from admin-defined rules | ☐ |
-| Invoices | Confirm, cancel, send, print; Draft → Confirmed → Paid | ☐ |
-| Discounts | Admin-only; fixed or percentage; min purchase/quantity; start/end dates; usage limit | ☐ |
-| Discounts | Apply to specific products or whole subscriptions; auto-applied on next invoice; stop on expiry or limit | ☐ |
-| Payments | Recorded with method, amount, date, note against an invoice | ☐ |
-| Payments | Paid vs outstanding visible at any time; overdue invoices flagged | ☐ |
-| Reports | Dashboard: active subscriptions, revenue, outstanding, overdue, with filters and summary | ☐ |
-| Performance | Every page responds in under 2 seconds with thousands of subscriptions | ☐ |
+| Signup | Email is unique per account | ✅ |
+| Signup | Password longer than 8 characters, with an uppercase letter, a lowercase letter and a special character | ✅ |
+| Auth | Forgot password sends a reset link to the registered email (expiring token) | ✅ |
+| RBAC | Admin controls everything; only Admin can add staff | ✅ |
+| RBAC | Staff have limited access to day-to-day work | ✅ |
+| RBAC | Customers see only their own subscriptions and invoices (portal) | ✅ |
+| Catalog | Products with name, type, sales price, cost price, notes | ✅ |
+| Catalog | Variants (e.g. Brand = Odoo adds 560 to the price) | ✅ |
+| Plans | Price, billing period (daily/weekly/monthly/yearly), minimum quantity, availability dates | ✅ |
+| Plans | Per-plan options: auto-close on end, close early, pause, renew | ✅ |
+| Templates | Quotation templates with plan and product lines and a validity in days | ✅ |
+| Subscriptions | Unique number, customer, plan, start/expiry date, payment terms, lines | ✅ |
+| Subscriptions | Lifecycle Draft → Quotation → Confirmed → Active → Closed, visible to the team | ✅ |
+| Billing | Invoices generated from subscriptions with customer, lines, taxes, totals prefilled | ✅ |
+| Billing | Never billed twice, never skipped (idempotent billing job) | ✅ |
+| Taxes | Calculated automatically from admin-defined rules | ✅ |
+| Invoices | Confirm, cancel, send, print; Draft → Confirmed → Paid | ✅ |
+| Discounts | Admin-only; fixed or percentage; min purchase/quantity; start/end dates; usage limit | ✅ |
+| Discounts | Apply to specific products or whole subscriptions; auto-applied on next invoice; stop on expiry or limit | ✅ |
+| Payments | Recorded with method, amount, date, note against an invoice | ✅ |
+| Payments | Paid vs outstanding visible at any time; overdue invoices flagged | ✅ |
+| Reports | Dashboard: active subscriptions, revenue, outstanding, overdue, with filters and summary | ✅ |
+| Performance | Every page responds in under 2 seconds with thousands of subscriptions | ✅ |
 
 (Tick the boxes as features are completed.)
 
@@ -235,6 +235,7 @@ npm run dev                 # http://localhost:5173
 | Variable | Description | Example |
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/brightloop` |
+| `DIRECT_URL` | Direct PostgreSQL connection used by Prisma | `postgresql://user:pass@localhost:5432/brightloop` |
 | `JWT_SECRET` | Secret for signing tokens | `change-me` |
 | `JWT_EXPIRES_IN` | Token lifetime | `1d` |
 | `PORT` | API port | `5000` |
@@ -244,7 +245,7 @@ npm run dev                 # http://localhost:5173
 | `MAIL_FROM` | Sender address | `billing@brightloop.test` |
 | `RESET_TOKEN_TTL_MINUTES` | Reset link validity | `30` |
 | `BILLING_CRON` | Billing job schedule | `0 2 * * *` |
-| `VITE_API_URL` | API base URL for the client | `http://localhost:5000/api` |
+| `VITE_API_URL` | API origin for the client | `http://localhost:5000` |
 
 ### Useful scripts
 
@@ -256,6 +257,7 @@ npm run dev                 # http://localhost:5173
 | `npx prisma studio` | Browse the database |
 | `npm run seed:large` | Seed 5,000+ subscriptions for performance testing |
 | `npm run billing:run` | Run the billing job manually |
+| `npm run benchmark` | Benchmark list and report endpoints against the configured API |
 
 ### Default seeded accounts (development only)
 
@@ -325,8 +327,10 @@ npm run dev                 # http://localhost:5173
 
 - **Database + API:** Render or Railway. Set the environment variables above and run `npx prisma migrate deploy` on release.
 - **Frontend:** Vercel. Set `VITE_API_URL` to the deployed API.
-- **Live URL:** _add here_
-- **Demo video:** _add here_
+- **Live URL:** Pending deployment.
+- **Demo video:** Pending recording.
+- **API base:** Pending deployment.
+- **Benchmark:** Run `npm run benchmark -- https://<deployed-api-origin>` in `server`; add measured results here after deployment.
 
 ## 13. Demo Script (5 minutes)
 

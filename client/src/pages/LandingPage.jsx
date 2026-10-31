@@ -1,4 +1,5 @@
 import HealthCard from '../components/HealthCard';
+import { Link } from 'react-router-dom';
 import { Layers, ShieldCheck, Box, CreditCard, Receipt, FileText, UserCheck, Sparkles } from 'lucide-react';
 
 const modules = [
@@ -29,6 +30,8 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-400">
+            <Link to="/app/invoices" className="rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800">Staff billing</Link>
+            <Link to="/portal/my-payments" className="rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-3 py-2 text-indigo-200 hover:bg-indigo-500/20">Customer portal</Link>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Scaffold Milestone (M1)
@@ -51,6 +54,15 @@ export default function LandingPage() {
           <p className="text-sm sm:text-base text-slate-400">
             Engineered for Brightloop Software. A modern, enterprise-ready multi-tenant subscription engine built with Node.js, Express, PostgreSQL, Prisma, React, and Tailwind CSS.
           </p>
+          <div className="pt-2 flex justify-center">
+            <Link
+              to="/app/catalog/products"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
+            >
+              <Box className="w-4 h-4" />
+              <span>Launch Catalog Module &bull; Member 2</span>
+            </Link>
+          </div>
         </div>
 
         {/* Health Check Live Integration Card */}

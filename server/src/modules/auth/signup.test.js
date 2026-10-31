@@ -74,7 +74,7 @@ describe('POST /api/auth/signup', () => {
   it('returns 409 when the email is already registered', async () => {
     const createUser = jest.fn().mockRejectedValue({ code: 'P2002' });
     const { app, prisma } = createTestApp({ createUser });
-    const response = await request(app).post('/api/auth/signup').send(validInput);
+    const response = await request(app).post('/api/auth/signup').send({ ...validInput, role: 'ADMIN' });
 
     expect(response.status).toBe(409);
     expect(response.body).toEqual({ error: { message: 'Email already registered' } });

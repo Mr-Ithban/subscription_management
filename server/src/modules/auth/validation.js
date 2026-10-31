@@ -26,3 +26,14 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Reset token is required'),
   password: passwordSchema,
 });
+
+export const staffCreateSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.string().trim().email('Email must be valid'),
+  password: passwordSchema,
+});
+
+export const staffListSchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});

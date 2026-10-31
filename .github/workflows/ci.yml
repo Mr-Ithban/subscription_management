@@ -28,6 +28,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/brightloop_test?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/brightloop_test?schema=public
       NODE_ENV: test
       JWT_SECRET: test-super-secret-jwt-key-for-testing
       JWT_EXPIRES_IN: 1d
