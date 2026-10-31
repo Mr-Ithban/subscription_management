@@ -2,8 +2,10 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { rateLimit } from 'express-rate-limit';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import authRoutes from './modules/auth/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -31,10 +33,20 @@ app.use(
 // JSON body parsing
 app.use(express.json());
 
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many authentication requests. Please try again later.' } },
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.use('/api/auth', authRateLimit, authRoutes);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
