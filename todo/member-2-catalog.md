@@ -94,7 +94,7 @@
 
 ---
 
-## [ ] M2-8: Catalog UI
+## [x] M2-8: Catalog UI
 - **Branch**: `feature/m2-catalog-ui`
 - **Scope**: `client/src/pages/catalog/`
 - **Screens**: Products (with variant editor), Plans (with action buttons), Taxes, Discounts.
