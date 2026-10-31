@@ -293,7 +293,7 @@ model Invoice {
   number         String            @unique
   subscriptionId String
   customerId     String
-  customer       Customer          @relation(fields: [customerId], references: [id])
+  customer       Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
   status         InvoiceStatus     @default(DRAFT)
   periodStart    DateTime
   periodEnd      DateTime
