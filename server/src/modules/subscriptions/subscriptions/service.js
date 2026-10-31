@@ -80,7 +80,7 @@ async function buildLineData(prisma, lines) {
   return result;
 }
 
-function newSubscriptionNumber() {
+export function newSubscriptionNumber() {
   return `SUB-${Date.now()}-${randomBytes(3).toString('hex').toUpperCase()}`;
 }
 

@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { createTemplate, deleteTemplate, getTemplate, TemplateError, updateTemplate } from './service.js';
+import { createSubscriptionFromTemplate, createTemplate, deleteTemplate, getTemplate, TemplateError, updateTemplate } from './service.js';
 
 const baseTemplate = {
   id: 'tpl_1',
@@ -78,5 +78,59 @@ describe('quotation template service', () => {
     const prisma = createPrisma();
     prisma.quotationTemplate.findUnique.mockResolvedValue(null);
     await expect(getTemplate(prisma, 'missing')).rejects.toBeInstanceOf(TemplateError);
+  });
+
+  it('creates a quotation subscription using saved template prices and records its initial history', async () => {
+    const template = {
+      id: 'tpl_1', name: 'Standard quote', planId: 'plan_1',
+      plan: { id: 'plan_1', status: 'ACTIVE', minQty: 1, startDate: new Date('2026-01-01'), endDate: null },
+      lines: [{ productId: 'prod_1', variantId: 'var_1', taxId: 'tax_1', quantity: 2, unitPrice: 425 }],
+    };
+    const prisma = {
+      $transaction: jest.fn(async (callback) => callback({
+        quotationTemplate: { findUnique: jest.fn(async () => template) },
+        customer: { findUnique: jest.fn(async () => ({ id: 'customer_1' })) },
+        product: { findUnique: jest.fn(async () => ({ id: 'prod_1', active: true, salesPrice: 900 })) },
+        productVariant: { findUnique: jest.fn(async () => ({ id: 'var_1', productId: 'prod_1' })) },
+        tax: { findUnique: jest.fn(async () => ({ id: 'tax_1', active: true })) },
+        subscription: { create: jest.fn(async ({ data }) => data) },
+      })),
+    };
+
+    const result = await createSubscriptionFromTemplate(prisma, 'tpl_1', {
+      customerId: 'customer_1', startDate: new Date('2026-03-01'), paymentTerms: 10,
+    }, 'user_1');
+
+    expect(result.status).toBe('QUOTATION');
+    expect(result.lines.create[0]).toMatchObject({ unitPrice: 425, amount: 850, quantity: 2 });
+    expect(result.history.create).toMatchObject({
+      fromStatus: 'DRAFT', toStatus: 'QUOTATION', changedById: 'user_1',
+      note: 'Created from quotation template Standard quote',
+    });
+  });
+
+  it('rejects missing customers or invalid template line references', async () => {
+    const plan = { id: 'plan_1', status: 'ACTIVE', minQty: 1, startDate: new Date('2026-01-01'), endDate: null };
+    const template = { id: 'tpl_1', name: 'Standard', planId: 'plan_1', plan, lines: [{
+      productId: 'prod_1', variantId: 'var_1', taxId: null, quantity: 1, unitPrice: 100,
+    }] };
+    const tx = {
+      quotationTemplate: { findUnique: jest.fn(async () => template) },
+      customer: { findUnique: jest.fn(async () => ({ id: 'customer_1' })) },
+      product: { findUnique: jest.fn(async () => ({ id: 'prod_1', active: true })) },
+      productVariant: { findUnique: jest.fn(async () => ({ id: 'var_1', productId: 'other_product' })) },
+      tax: { findUnique: jest.fn() },
+      subscription: { create: jest.fn() },
+    };
+    const prisma = { $transaction: jest.fn(async (callback) => callback(tx)) };
+    await expect(createSubscriptionFromTemplate(prisma, 'tpl_1', {
+      customerId: 'customer_1', startDate: new Date('2026-03-01'), paymentTerms: 0,
+    }, 'user_1')).rejects.toMatchObject({ statusCode: 409 });
+    expect(tx.subscription.create).not.toHaveBeenCalled();
+
+    tx.customer.findUnique.mockResolvedValue(null);
+    await expect(createSubscriptionFromTemplate(prisma, 'tpl_1', {
+      customerId: 'missing', startDate: new Date('2026-03-01'), paymentTerms: 0,
+    }, 'user_1')).rejects.toMatchObject({ statusCode: 404 });
   });
 });

@@ -23,3 +23,12 @@ export const updateTemplateSchema = z.object({
 }).refine((data) => Object.keys(data).length > 0, { message: 'At least one field must be provided' });
 
 export const templateIdSchema = z.object({ id: z.string().min(1) });
+
+export const createSubscriptionFromTemplateSchema = z.object({
+  customerId: z.string().min(1),
+  startDate: z.coerce.date(),
+  expiryDate: z.coerce.date().nullable().optional(),
+  paymentTerms: z.number().int().nonnegative().default(0),
+}).refine((data) => !data.expiryDate || data.expiryDate >= data.startDate, {
+  message: 'Expiry date must be on or after the start date', path: ['expiryDate'],
+});
