@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import productsRouter from './modules/catalog/products/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -35,6 +36,9 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+// Catalog routes
+app.use('/api/products', productsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
