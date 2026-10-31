@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import authRoutes from './modules/auth/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -35,6 +36,8 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.use('/api/auth', authRoutes);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
