@@ -32,6 +32,10 @@ export const updateSubscriptionSchema = z.object({
 
 export const subscriptionIdSchema = z.object({ id: z.string().min(1) });
 
+export const transitionBodySchema = z.object({
+  note: z.string().trim().max(500).optional(),
+}).default({});
+
 export const listSubscriptionsSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),

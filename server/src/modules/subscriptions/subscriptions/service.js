@@ -12,7 +12,27 @@ const includeSubscription = {
   customer: true,
   plan: true,
   lines: { include: { product: true, variant: true, tax: true }, orderBy: { createdAt: 'asc' } },
+  history: { include: { changedBy: { select: { id: true, email: true } } }, orderBy: { createdAt: 'asc' } },
 };
+
+const allowedTransitions = {
+  DRAFT: 'QUOTATION',
+  QUOTATION: 'CONFIRMED',
+  CONFIRMED: 'ACTIVE',
+  ACTIVE: 'CLOSED',
+  CLOSED: null,
+};
+
+const transitionRouteStatus = {
+  quote: 'QUOTATION',
+  confirm: 'CONFIRMED',
+  activate: 'ACTIVE',
+  close: 'CLOSED',
+};
+
+export function statusForTransitionAction(action) {
+  return transitionRouteStatus[action];
+}
 
 async function requireCustomer(prisma, customerId) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId }, select: { id: true } });
@@ -129,5 +149,32 @@ export async function updateSubscription(prisma, id, data) {
       data: { ...subscriptionData, ...(lineData !== undefined && { lines: { create: lineData } }) },
       include: includeSubscription,
     });
+  });
+}
+
+export async function transitionSubscription(prisma, id, toStatus, { changedById = null, note = null } = {}) {
+  return prisma.$transaction(async (tx) => {
+    const current = await tx.subscription.findUnique({
+      where: { id },
+      select: { id: true, status: true, expiryDate: true, plan: { select: { allowEarlyClose: true } } },
+    });
+    if (!current) throw new SubscriptionError('Subscription not found', 404);
+    if (allowedTransitions[current.status] !== toStatus) {
+      throw new SubscriptionError(`Invalid subscription transition: ${current.status} to ${toStatus}`, 409);
+    }
+    if (toStatus === 'CLOSED' && !current.plan.allowEarlyClose && (!current.expiryDate || current.expiryDate > new Date())) {
+      throw new SubscriptionError('The plan does not allow early closure', 409);
+    }
+
+    const changed = await tx.subscription.updateMany({
+      where: { id, status: current.status },
+      data: { status: toStatus },
+    });
+    if (changed.count !== 1) throw new SubscriptionError('Subscription status changed concurrently; retry the request', 409);
+
+    await tx.subscriptionHistory.create({
+      data: { subscriptionId: id, fromStatus: current.status, toStatus, changedById, note },
+    });
+    return tx.subscription.findUnique({ where: { id }, include: includeSubscription });
   });
 }

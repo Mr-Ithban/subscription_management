@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { createSubscription, getSubscription, SubscriptionError, updateSubscription, listSubscriptions } from './service.js';
+import { createSubscription, getSubscription, SubscriptionError, updateSubscription, listSubscriptions, transitionSubscription } from './service.js';
 
 function fakePrisma() {
   const plan = { id: 'plan_1', status: 'ACTIVE', startDate: new Date('2026-01-01'), endDate: null, minQty: 1 };
@@ -9,8 +9,18 @@ function fakePrisma() {
   const subscription = { id: 'sub_1', customerId: 'customer_1', planId: 'plan_1', startDate: new Date('2026-02-01') };
   const tx = {
     subscriptionLine: { deleteMany: jest.fn(async () => ({ count: 1 })) },
+    subscriptionHistory: { create: jest.fn(async ({ data }) => data) },
     subscription: { update: jest.fn(async ({ data }) => ({ ...subscription, ...data })) },
   };
+  let currentStatus = 'DRAFT';
+  tx.subscription.findUnique = jest.fn(async () => ({
+    id: 'sub_1', status: currentStatus, expiryDate: null, plan: { allowEarlyClose: true },
+  }));
+  tx.subscription.updateMany = jest.fn(async ({ where, data }) => {
+    if (currentStatus !== where.status) return { count: 0 };
+    currentStatus = data.status;
+    return { count: 1 };
+  });
   return {
     plan: { findUnique: jest.fn(async () => plan) },
     customer: { findUnique: jest.fn(async () => ({ id: 'customer_1' })) },
@@ -75,5 +85,40 @@ describe('subscription service', () => {
     const result = await listSubscriptions(prisma, { page: 2, limit: 10, status: 'ACTIVE' });
     expect(prisma.subscription.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 10, take: 10, where: { status: 'ACTIVE' } }));
     expect(result.pagination).toEqual({ page: 2, limit: 10, total: 1, pages: 1 });
+  });
+
+  it('allows each documented transition and records the actor and history', async () => {
+    const prisma = fakePrisma();
+    prisma.tx.subscription.findUnique.mockImplementation(async () => ({
+      id: 'sub_1', status: prisma.tx.currentStatus ?? 'DRAFT', expiryDate: null, plan: { allowEarlyClose: true },
+    }));
+    const statuses = ['QUOTATION', 'CONFIRMED', 'ACTIVE', 'CLOSED'];
+    let fromStatus = 'DRAFT';
+    for (const toStatus of statuses) {
+      prisma.tx.subscription.findUnique.mockResolvedValueOnce({
+        id: 'sub_1', status: fromStatus, expiryDate: null, plan: { allowEarlyClose: true },
+      });
+      prisma.tx.subscription.updateMany.mockResolvedValueOnce({ count: 1 });
+      prisma.tx.subscription.findUnique.mockResolvedValueOnce({ id: 'sub_1', status: toStatus });
+      const result = await transitionSubscription(prisma, 'sub_1', toStatus, { changedById: 'user_1', note: 'approved' });
+      expect(result.status).toBe(toStatus);
+      expect(prisma.tx.subscriptionHistory.create).toHaveBeenLastCalledWith({
+        data: { subscriptionId: 'sub_1', fromStatus, toStatus, changedById: 'user_1', note: 'approved' },
+      });
+      fromStatus = toStatus;
+    }
+  });
+
+  it('rejects skipped transitions and plan-disallowed early closure with 409', async () => {
+    const prisma = fakePrisma();
+    prisma.tx.subscription.findUnique.mockResolvedValueOnce({
+      id: 'sub_1', status: 'DRAFT', expiryDate: null, plan: { allowEarlyClose: true },
+    });
+    await expect(transitionSubscription(prisma, 'sub_1', 'ACTIVE')).rejects.toMatchObject({ statusCode: 409 });
+
+    prisma.tx.subscription.findUnique.mockResolvedValueOnce({
+      id: 'sub_1', status: 'ACTIVE', expiryDate: new Date(Date.now() + 86400000), plan: { allowEarlyClose: false },
+    });
+    await expect(transitionSubscription(prisma, 'sub_1', 'CLOSED')).rejects.toMatchObject({ statusCode: 409 });
   });
 });
