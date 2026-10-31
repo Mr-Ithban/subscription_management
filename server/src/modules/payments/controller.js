@@ -4,6 +4,8 @@ import {
   listInvoicePayments,
   PaymentError,
 } from './service.js';
+import { getOutstandingInvoices, getOverdueInvoices } from './queries.js';
+import { parsePagination } from '../../utils/pagination.js';
 
 export function createPaymentsController(prisma) {
   return {
@@ -52,6 +54,33 @@ export function createPaymentsController(prisma) {
         return next(error);
       }
     },
+
+    getOutstanding: async (req, res, next) => {
+      try {
+        const pagination = parsePagination(req.query);
+        const result = await getOutstandingInvoices(prisma, {
+          customerId: req.query.customerId,
+          pagination,
+        });
+        return res.status(200).json(result);
+      } catch (error) {
+        return next(error);
+      }
+    },
+
+    getOverdue: async (req, res, next) => {
+      try {
+        const pagination = parsePagination(req.query);
+        const asOf = req.query.asOf ? new Date(req.query.asOf) : undefined;
+        const result = await getOverdueInvoices(prisma, {
+          asOf,
+          customerId: req.query.customerId,
+          pagination,
+        });
+        return res.status(200).json(result);
+      } catch (error) {
+        return next(error);
+      }
+    },
   };
 }
-

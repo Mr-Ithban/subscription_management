@@ -9,6 +9,8 @@ import {
   recordPaymentSchema,
   listPaymentsQuerySchema,
   invoiceParamSchema,
+  outstandingQuerySchema,
+  overdueQuerySchema,
 } from './validation.js';
 
 const defaultPrisma = new PrismaClient();
@@ -17,16 +19,32 @@ export function createPaymentsRouter(prisma = defaultPrisma) {
   const router = Router();
   const controller = createPaymentsController(prisma);
 
-  // Authentication required for payments
+  // Authentication required for all payments routes
   router.use(createAuthenticate(prisma));
 
-  // GET /api/payments (paginated; filters invoiceId, method, dateFrom, dateTo)
+  // GET /api/payments — paginated list; filters: invoiceId, method, dateFrom, dateTo
   router.get(
     '/',
     authorize('ADMIN', 'STAFF'),
     validate(listPaymentsQuerySchema, 'query'),
     pagination,
     controller.listPayments
+  );
+
+  // GET /api/payments/outstanding — all CONFIRMED (unpaid) invoices with summary
+  router.get(
+    '/outstanding',
+    authorize('ADMIN', 'STAFF'),
+    validate(outstandingQuerySchema, 'query'),
+    controller.getOutstanding
+  );
+
+  // GET /api/payments/overdue — CONFIRMED invoices past their dueDate
+  router.get(
+    '/overdue',
+    authorize('ADMIN', 'STAFF'),
+    validate(overdueQuerySchema, 'query'),
+    controller.getOverdue
   );
 
   return router;
@@ -39,7 +57,7 @@ export function createInvoicePaymentsRouter(prisma = defaultPrisma) {
   // Authentication required for invoice payment operations
   router.use(createAuthenticate(prisma));
 
-  // GET /api/invoices/:id/payments (ADMIN and STAFF)
+  // GET /api/invoices/:id/payments — list payments for a specific invoice
   router.get(
     '/:id/payments',
     authorize('ADMIN', 'STAFF'),
@@ -48,7 +66,7 @@ export function createInvoicePaymentsRouter(prisma = defaultPrisma) {
     controller.listInvoicePayments
   );
 
-  // POST /api/invoices/:id/payments (ADMIN and STAFF)
+  // POST /api/invoices/:id/payments — record a payment against an invoice
   router.post(
     '/:id/payments',
     authorize('ADMIN', 'STAFF'),
@@ -61,4 +79,3 @@ export function createInvoicePaymentsRouter(prisma = defaultPrisma) {
 }
 
 export default createPaymentsRouter(defaultPrisma);
-

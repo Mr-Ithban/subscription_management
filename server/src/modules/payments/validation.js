@@ -38,3 +38,16 @@ export const listPaymentsQuerySchema = z.object({
 export const invoiceParamSchema = z.object({
   id: z.string().trim().min(1, 'Invoice ID is required'),
 });
+
+export const outstandingQuerySchema = z.object({
+  customerId: z.string().trim().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
+export const overdueQuerySchema = z.object({
+  customerId: z.string().trim().optional(),
+  asOf: z.coerce.date().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
