@@ -9,3 +9,27 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ===== PAYMENTS =====
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  UPI
+  CHEQUE
+  ONLINE
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  method      PaymentMethod
+  amount      Int
+  paidAt      DateTime
+  note        String?
+  createdById String?
+  createdAt   DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@index([paidAt])
+}
