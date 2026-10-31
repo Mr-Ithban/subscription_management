@@ -26,7 +26,7 @@
 
 ---
 
-## [ ] M2-3: Plans and Billing Period Helper
+## [x] M2-3: Plans and Billing Period Helper
 - **Branch**: `feature/m2-plans`
 - **Scope**: `server/src/modules/catalog/plans`, `server/src/modules/catalog/billingPeriod.js`
 - **Requirements**:
