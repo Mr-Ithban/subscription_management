@@ -1,0 +1,32 @@
+services:
+  # Express API
+  - type: web
+    name: brightloop-api
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma migrate deploy && node src/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brightloop-db
+          property: connectionString
+      - key: DIRECT_URL
+        fromDatabase:
+          name: brightloop-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        value: https://brightloop.vercel.app
+
+  # PostgreSQL database
+  - type: pserv
+    name: brightloop-db
+    env: postgresql
+    plan: free
+    ipAllowList: []

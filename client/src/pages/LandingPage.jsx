@@ -30,8 +30,8 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-400">
-            <Link to="/billing" className="rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800">Staff billing</Link>
-            <Link to="/portal" className="rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-3 py-2 text-indigo-200 hover:bg-indigo-500/20">Customer portal</Link>
+            <Link to="/app/invoices" className="rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800">Staff billing</Link>
+            <Link to="/portal/my-payments" className="rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-3 py-2 text-indigo-200 hover:bg-indigo-500/20">Customer portal</Link>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Scaffold Milestone (M1)

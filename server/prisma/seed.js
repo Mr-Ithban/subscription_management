@@ -7,8 +7,9 @@ export async function seedAuth(prisma) {
 
   return prisma.user.upsert({
     where: { email: 'admin@brightloop.test' },
-    update: {},
+    update: { name: 'Brightloop Admin' },
     create: {
+      name: 'Brightloop Admin',
       email: 'admin@brightloop.test',
       passwordHash,
       role: 'ADMIN',

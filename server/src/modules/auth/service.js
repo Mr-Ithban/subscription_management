@@ -7,7 +7,7 @@ const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
 export function getPublicUser(user) {
   return {
     id: user.id,
-    name: user.customer?.name ?? null,
+    name: user.customer?.name ?? user.name ?? null,
     email: user.email,
     role: user.role,
   };

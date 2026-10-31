@@ -1,88 +1,93 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from 'react';
-
-const AuthContext = createContext(null);
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import AuthContext from '../auth/AuthContext';
+import {
+  clearStoredToken,
+  getCurrentUser,
+  getStoredToken,
+  loginRequest,
+  signupRequest,
+  storeToken,
+} from '../api/auth';
+export { useAuth } from '../auth/useAuth';
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('auth_user');
-    if (saved) {
+  const [session, setSession] = useState({ user: null, customer: null, loading: true });
+
+  const clearSession = useCallback(() => {
+    clearStoredToken();
+    setSession({ user: null, customer: null, loading: false });
+  }, []);
+
+  const refreshSession = useCallback(async () => {
+    if (!getStoredToken()) {
+      setSession({ user: null, customer: null, loading: false });
+      return null;
+    }
+
+    try {
+      const profile = await getCurrentUser();
+      setSession({ user: profile.user, customer: profile.customer, loading: false });
+      return profile.user;
+    } catch (error) {
+      clearSession();
+      throw error;
+    }
+  }, [clearSession]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function restore() {
+      if (!getStoredToken()) {
+        if (active) setSession({ user: null, customer: null, loading: false });
+        return;
+      }
+
       try {
-        return JSON.parse(saved);
+        const profile = await getCurrentUser();
+        if (active) setSession({ user: profile.user, customer: profile.customer, loading: false });
       } catch {
-        // Fallback
+        clearStoredToken();
+        if (active) setSession({ user: null, customer: null, loading: false });
       }
     }
-    // Default demo user with ADMIN role
-    return {
-      id: 'admin-1',
-      name: 'System Admin',
-      email: 'admin@brightloop.test',
-      role: 'ADMIN',
+
+    restore();
+    return () => {
+      active = false;
     };
-  });
+  }, []);
 
-  const [token, setToken] = useState(() => localStorage.getItem('token') || 'demo-token');
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('auth_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('auth_user');
+  const login = useCallback(async (credentials) => {
+    const result = await loginRequest(credentials);
+    storeToken(result.token);
+    try {
+      const profile = await getCurrentUser();
+      setSession({ user: profile.user, customer: profile.customer, loading: false });
+      return profile.user;
+    } catch (error) {
+      clearSession();
+      throw error;
     }
-  }, [user]);
+  }, [clearSession]);
 
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-  }, [token]);
+  const signup = useCallback((details) => signupRequest(details), []);
 
-  const switchRole = (newRole) => {
-    setUser((prev) => ({
-      ...prev,
-      role: newRole,
-      name: newRole === 'ADMIN' ? 'System Admin' : 'Staff Member',
-      email: `${newRole.toLowerCase()}@brightloop.test`,
-    }));
-  };
+  const logout = useCallback(() => {
+    clearSession();
+  }, [clearSession]);
 
-  const login = (userData, userToken) => {
-    setUser(userData);
-    setToken(userToken);
-  };
+  const value = useMemo(() => ({
+    user: session.user,
+    role: session.user?.role ?? null,
+    customer: session.customer,
+    loading: session.loading,
+    isAuthenticated: Boolean(session.user),
+    login,
+    signup,
+    logout,
+    refreshSession,
+  }), [session, login, signup, logout, refreshSession]);
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('auth_user');
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        role: user?.role || 'GUEST',
-        isAdmin: user?.role === 'ADMIN',
-        isStaff: user?.role === 'STAFF',
-        switchRole,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

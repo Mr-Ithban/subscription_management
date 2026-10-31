@@ -25,7 +25,7 @@ export default function PortalPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4"><Link to="/" className="flex items-center gap-2 text-sm text-slate-400 hover:text-white"><ArrowLeft size={16} /> Brightloop</Link><Link to="/billing" className="text-sm text-indigo-300 hover:text-indigo-200">Staff billing</Link></div></header>
+      <header className="border-b border-slate-800"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4"><Link to="/portal/my-payments" className="flex items-center gap-2 text-sm text-slate-400 hover:text-white"><ArrowLeft size={16} /> Brightloop portal</Link></div></header>
       <div className="mx-auto max-w-6xl space-y-7 px-5 py-8">
         <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300">Your account</p><h1 className="mt-2 text-3xl font-bold text-white">Subscription portal</h1><p className="mt-2 text-sm text-slate-400">View your current plans, billing periods, and invoice history.</p></div>
         {!token ? <LoginNotice /> : <>

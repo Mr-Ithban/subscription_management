@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './modules/auth/routes.js';
+import staffRouter from './modules/auth/staff.js';
 import productsRouter from './modules/catalog/products/routes.js';
 import plansRouter from './modules/catalog/plans/routes.js';
 import taxesRouter from './modules/catalog/taxes/routes.js';
@@ -17,6 +18,7 @@ import invoicesRouter from './modules/billing/invoiceRoutes.js';
 import portalBillingRouter from './modules/billing/portalRoutes.js';
 import paymentsRouter, { createInvoicePaymentsRouter } from './modules/payments/routes.js';
 import reportsRouter from './modules/reports/routes.js';
+import portalRouter from './modules/portal/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -58,6 +60,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRateLimit, authRoutes);
+app.use('/api/staff', staffRouter);
 // Catalog routes
 app.use('/api/products', productsRouter);
 app.use('/api/plans', plansRouter);
@@ -73,6 +76,8 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/invoices', createInvoicePaymentsRouter());
 // Reports routes
 app.use('/api/reports', reportsRouter);
+// Portal routes
+app.use('/api/portal', portalRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);

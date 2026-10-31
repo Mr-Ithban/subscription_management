@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDownToLine, ArrowLeft, Check, FileText, Layers, Mail, X } from 'lucide-react';
+import { ArrowDownToLine, ArrowLeft, Check, FileText, Layers, Mail, X, CreditCard } from 'lucide-react';
 import { downloadInvoicePdf, getRequestError, getSessionToken, getStaffInvoices, getStaffSubscriptions, runInvoiceAction, runSubscriptionAction } from '../../api/billing';
 
 const money = (amount = 0) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount / 100);
@@ -62,6 +62,7 @@ function InvoiceTable({ invoices, onAction, busyId }) {
               {item.status === 'DRAFT' && <button disabled={busyId === item.id} title="Confirm" onClick={() => onAction(item.id, 'confirm')} className="rounded-lg border border-slate-700 p-2 hover:bg-slate-800"><Check size={15} /></button>}
               {['DRAFT', 'CONFIRMED'].includes(item.status) && <button disabled={busyId === item.id} title="Cancel" onClick={() => onAction(item.id, 'cancel')} className="rounded-lg border border-slate-700 p-2 hover:bg-slate-800"><X size={15} /></button>}
               {item.status === 'CONFIRMED' && <button disabled={busyId === item.id} title="Email invoice" onClick={() => onAction(item.id, 'send')} className="rounded-lg border border-slate-700 p-2 hover:bg-slate-800"><Mail size={15} /></button>}
+              <Link to={`/app/invoices/${item.id}/payments`} title="View payments" aria-label={`View payments for ${item.number}`} className="rounded-lg border border-slate-700 p-2 hover:bg-slate-800"><CreditCard size={15} /></Link>
               <button title="Download PDF" onClick={() => downloadInvoicePdf(item.id).catch(() => {})} className="rounded-lg border border-slate-700 p-2 hover:bg-slate-800"><ArrowDownToLine size={15} /></button>
             </div></td>
           </tr>)}

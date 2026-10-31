@@ -1,97 +1,75 @@
-import { ChevronLeft, ChevronRight, AlertCircle, Inbox, Loader2 } from 'lucide-react';
+import React from 'react';
 
 export default function DataTable({
-  columns,
+  columns = [],
   data = [],
-  loading = false,
-  error = null,
-  pagination,
-  title,
-  subtitle,
-  actions,
-  filters,
+  rows,
+  isLoading = false,
   emptyMessage = 'No records found',
+  pagination,
+  page,
+  limit,
+  total,
+  onPageChange,
 }) {
-  const errorMessage =
-    typeof error === 'string'
-      ? error
-      : error?.response?.data?.error?.message || error?.message;
+  const records = rows ?? data;
+  const pageInfo = pagination ?? (rows ? { page: page || 1, limit: limit || 20, total: total || 0 } : null);
+  const totalPages = pageInfo ? Math.ceil((pageInfo.total || 0) / (pageInfo.limit || 20)) : 1;
+  const currentPage = pageInfo?.page || 1;
+
+  if (isLoading) {
+    return (
+      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-full"></div>
+          <div className="h-10 bg-gray-100 rounded w-full"></div>
+          <div className="h-10 bg-gray-100 rounded w-full"></div>
+          <div className="h-10 bg-gray-100 rounded w-full"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl overflow-hidden backdrop-blur-md shadow-xl shadow-black/20 flex flex-col">
-      {/* Header Bar */}
-      {(title || actions || filters) && (
-        <div className="p-5 border-b border-slate-800/80 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-slate-900/40">
-          <div>
-            {title && <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>}
-            {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {filters}
-            {actions}
-          </div>
-        </div>
-      )}
-
-      {/* Error Alert */}
-      {errorMessage && (
-        <div className="m-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Table Content */}
-      <div className="overflow-x-auto min-h-[240px]">
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr className="border-b border-slate-800/80 bg-slate-950/40 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-300">
+          <thead className="bg-gray-50">
+            <tr>
               {columns.map((col, idx) => (
                 <th
-                  key={col.header || idx}
-                  className={`py-3.5 px-4 ${col.className || ''}`}
+                  key={col.key || col.accessor || idx}
+                  scope="col"
+                  className={`py-3.5 px-4 text-left text-xs font-semibold text-gray-900 ${
+                    col.className || ''
+                  }`}
                 >
-                  {col.header}
+                  {col.header || col.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-850 text-slate-200">
-            {loading ? (
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {records.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="py-16 text-center text-slate-400">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
-                    <span>Loading catalog data...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : data.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="py-16 text-center text-slate-400">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Inbox className="w-8 h-8 text-slate-600 stroke-[1.5]" />
-                    <span className="font-medium text-slate-300">{emptyMessage}</span>
-                  </div>
+                <td
+                  colSpan={columns.length}
+                  className="py-8 px-4 text-center text-sm text-gray-500"
+                >
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (
-              data.map((row, rowIdx) => (
-                <tr
-                  key={row.id || rowIdx}
-                  className="hover:bg-slate-800/40 transition-colors group"
-                >
+              records.map((row, rowIdx) => (
+                <tr key={row.id || rowIdx} className="hover:bg-gray-50 transition-colors">
                   {columns.map((col, colIdx) => (
                     <td
-                      key={col.header || colIdx}
-                      className={`py-3.5 px-4 align-middle ${col.className || ''}`}
+                      key={col.key || col.accessor || colIdx}
+                      className={`whitespace-nowrap py-3 px-4 text-sm text-gray-700 ${
+                        col.className || ''
+                      }`}
                     >
-                      {col.cell
-                        ? col.cell(row)
-                        : typeof col.accessor === 'function'
-                        ? col.accessor(row)
-                        : row[col.accessor]}
+                      {col.render ? col.render(row) : row[col.accessor || col.key]}
                     </td>
                   ))}
                 </tr>
@@ -101,36 +79,30 @@ export default function DataTable({
         </table>
       </div>
 
-      {/* Pagination Bar */}
-      {pagination && (
-        <div className="p-4 border-t border-slate-800/80 bg-slate-950/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-          <div>
-            Showing <span className="font-medium text-slate-200">{data.length}</span> of{' '}
-            <span className="font-medium text-slate-200">{pagination.total || 0}</span> items
+      {pageInfo && pageInfo.total > 0 && (
+        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+          <div className="text-sm text-gray-700">
+            Showing <span className="font-medium">{(currentPage - 1) * pageInfo.limit + 1}</span>{' '}
+            to{' '}
+            <span className="font-medium">
+              {Math.min(currentPage * pageInfo.limit, pageInfo.total)}
+            </span>{' '}
+            of <span className="font-medium">{pageInfo.total}</span> results
           </div>
-
-          <div className="flex items-center gap-2">
-            <span className="mr-2">
-              Page <span className="font-semibold text-slate-200">{pagination.page}</span> of{' '}
-              <span className="font-semibold text-slate-200">{pagination.totalPages || 1}</span>
-            </span>
-
+          <div className="flex space-x-2">
             <button
-              type="button"
-              disabled={pagination.page <= 1 || loading}
-              onClick={() => pagination.onPageChange(pagination.page - 1)}
-              className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              onClick={() => onPageChange && onPageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="relative inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft className="w-4 h-4" />
+              Previous
             </button>
-
             <button
-              type="button"
-              disabled={pagination.page >= (pagination.totalPages || 1) || loading}
-              onClick={() => pagination.onPageChange(pagination.page + 1)}
-              className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              onClick={() => onPageChange && onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="relative inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronRight className="w-4 h-4" />
+              Next
             </button>
           </div>
         </div>
@@ -138,3 +110,4 @@ export default function DataTable({
     </div>
   );
 }
+

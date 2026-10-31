@@ -48,6 +48,13 @@ Errors use `{ "error": { "message": "...", "details": {} } }`. The `details` pro
 omitted when there are no additional details. Prisma unique-constraint errors return 409.
 Authentication endpoints are limited to 20 requests per 15 minutes per client.
 
+## Staff administration
+
+`POST /api/staff` and `GET /api/staff?page=1&limit=20` require an ADMIN bearer token.
+Create body: `{ "name": "Sam Staff", "email": "sam@example.test", "password": "StrongPass!" }`.
+The password must contain at least 9 characters, uppercase and lowercase letters, and a special character.
+Staff lists return `{ "data": [], "page": 1, "limit": 20, "total": 0 }` without password hashes.
+
 ## Seeded Catalog Entities (Member 2)
 
 The database seed (`npm run seed` or `node prisma/seed.js`) populates baseline catalog data using deterministic IDs and idempotent upserts. Other modules (Member 3: Subscriptions/Billing, Member 4: Payments/Invoices) can safely reference these seeded entities:
@@ -104,3 +111,124 @@ Accessible by `ADMIN` and `STAFF`.
 - `GET /api/reports/revenue?from&to&groupBy=day|week|month`: revenue grouped by day, week, or month.
 - `GET /api/reports/subscriptions?status&planId&customerId&page&limit`: filtered and paginated subscriptions list.
 - `GET /api/reports/overdue?page&limit&customerId&asOf`: overdue invoices with days overdue and remaining balance.
+
+---
+
+## Auth API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/signup` | public | Register new user. Body: `{ email, password, name, role? }` |
+| POST | `/api/auth/login` | public | Login. Body: `{ email, password }`. Returns `{ token, user }` |
+| POST | `/api/auth/forgot-password` | public | Send reset email. Body: `{ email }` |
+| POST | `/api/auth/reset-password` | public | Reset password. Body: `{ token, password }` |
+| GET | `/api/auth/me` | Bearer | Current user info |
+
+---
+
+## Products API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/products` | ADMIN, STAFF | List products. Query: `?page&limit&search` |
+| POST | `/api/products` | ADMIN | Create product. Body: `{ name, type, salesPrice, costPrice?, notes? }` |
+| GET | `/api/products/:id` | ADMIN, STAFF | Get single product |
+| PUT | `/api/products/:id` | ADMIN | Update product |
+| DELETE | `/api/products/:id` | ADMIN | Soft-delete product |
+| POST | `/api/products/:id/variants` | ADMIN | Add variant. Body: `{ attribute, value, extraPrice }` |
+
+---
+
+## Payments API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/payments` | ADMIN, STAFF | List all payments. Query: `?page&limit&invoiceId` |
+| GET | `/api/invoices/:id/payments` | ADMIN, STAFF | List payments for invoice |
+| POST | `/api/invoices/:id/payments` | ADMIN, STAFF | Record payment. Body: `{ method, amount, paidAt, note? }` |
+
+### Payment methods
+`CARD` `UPI` `BANK_TRANSFER` `CASH` `CHEQUE` `ONLINE`
+
+### Record Payment example
+```http
+POST /api/invoices/inv_123/payments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "method": "UPI",
+  "amount": 59900,
+  "paidAt": "2026-10-31T10:00:00.000Z",
+  "note": "UPI ref: 1234567890"
+}
+```
+Response `201`:
+```json
+{
+  "id": "pmt_abc",
+  "invoiceId": "inv_123",
+  "method": "UPI",
+  "amount": 59900,
+  "paidAt": "2026-10-31T10:00:00.000Z",
+  "note": "UPI ref: 1234567890"
+}
+```
+
+---
+
+## Portal API (Customer only)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/portal/payments` | CUSTOMER | Paginated payments scoped to logged-in customer. Query: `?page&limit` |
+
+---
+
+## Reports API (detailed)
+
+### GET /api/reports/summary
+
+Query params: `from` (ISO date), `to` (ISO date)
+
+Response (200):
+```json
+{
+  "activeSubscriptionCount": 42,
+  "subscriptionsByStatus": { "ACTIVE": 42, "CONFIRMED": 8 },
+  "revenue": 1250000,
+  "invoicedTotal": 1800000,
+  "outstandingTotal": 550000,
+  "overdueCount": 5,
+  "overdueAmount": 125000,
+  "mrr": 208333
+}
+```
+
+### GET /api/reports/revenue
+
+Query params: `groupBy=day|week|month`, `from`, `to`
+
+Response (200):
+```json
+{
+  "groupBy": "month",
+  "totalRevenue": 1250000,
+  "breakdown": [
+    { "period": "2026-09", "revenue": 620000 },
+    { "period": "2026-10", "revenue": 630000 }
+  ]
+}
+```
+
+### GET /api/reports/subscriptions
+
+Query params: `status`, `planId`, `customerId`, `page`, `limit`
+
+Response (200): `{ data: [...], page, limit, total }`
+
+### GET /api/reports/overdue
+
+Query params: `page`, `limit`, `customerId`, `asOf` (ISO date, default: today)
+
+Response (200): `{ data: [{ id, number, dueDate, daysOverdue, remainingBalance, status, customer }], page, limit, total }`
