@@ -58,7 +58,7 @@
 
 ---
 
-## [ ] M2-5: Taxes
+## [x] M2-5: Taxes
 - **Branch**: `feature/m2-taxes`
 - **Scope**: `server/src/modules/catalog/taxes`, `server/src/modules/catalog/tax.js`
 - **Requirements**:
