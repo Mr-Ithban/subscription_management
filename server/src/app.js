@@ -9,6 +9,7 @@ import authRoutes from './modules/auth/routes.js';
 import productsRouter from './modules/catalog/products/routes.js';
 import plansRouter from './modules/catalog/plans/routes.js';
 import taxesRouter from './modules/catalog/taxes/routes.js';
+import discountsRouter from './modules/catalog/discounts/routes.js';
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -54,6 +55,7 @@ app.use('/api/auth', authRateLimit, authRoutes);
 app.use('/api/products', productsRouter);
 app.use('/api/plans', plansRouter);
 app.use('/api/taxes', taxesRouter);
+app.use('/api/discounts', discountsRouter);
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);

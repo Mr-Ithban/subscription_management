@@ -71,7 +71,7 @@
 
 ---
 
-## [ ] M2-6: Discount Rules (Admin Only)
+## [x] M2-6: Discount Rules (Admin Only)
 - **Branch**: `feature/m2-discounts`
 - **Scope**: `server/src/modules/catalog/discounts`
 - **Requirements**:

@@ -39,7 +39,7 @@
 | **M2-3** | Plans & billing period helper | `feature/m2-plans` | ✅ Done | `feat(catalog): add plan endpoints and billing period helper` |
 | **M2-4** | Plan actions & auto-close job | `feature/m2-plan-actions` | ✅ Done | `feat(catalog): add plan pause, close and renew actions with auto-close job` |
 | **M2-5** | Taxes & calculation helpers | `feature/m2-taxes` | ✅ Done | `feat(catalog): add tax rules and tax calculation helpers` |
-| **M2-6** | Discount rules (Admin only) | `feature/m2-discounts` | ⏳ Pending | `feat(catalog): add admin-only discount rules` |
+| **M2-6** | Discount rules (Admin only) | `feature/m2-discounts` | ✅ Done | `feat(catalog): add admin-only discount rules` |
 | **M2-7** | Discount applicability service | `feature/m2-discount-logic` | ⏳ Pending | `feat(catalog): add discount applicability and usage tracking service` |
 | **M2-8** | Catalog UI screens | `feature/m2-catalog-ui` | ⏳ Pending | `feat(client): add product, plan, tax and discount screens` |
 | **M2-9** | Catalog seed data | `feature/m2-catalog-seed` | ⏳ Pending | `feat(catalog): add catalog seed data` |
