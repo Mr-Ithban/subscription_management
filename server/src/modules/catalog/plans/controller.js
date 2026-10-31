@@ -4,6 +4,9 @@ import {
   createPlan,
   updatePlan,
   deletePlan,
+  pausePlan,
+  closePlan,
+  renewPlan,
   CatalogError,
 } from './service.js';
 
@@ -66,6 +69,42 @@ export function createPlansController(prisma) {
       try {
         const result = await deletePlan(prisma, req.params.id);
         return res.status(200).json(result);
+      } catch (error) {
+        if (error instanceof CatalogError) {
+          return res.status(error.statusCode).json({ error: { message: error.message } });
+        }
+        return next(error);
+      }
+    },
+
+    pause: async (req, res, next) => {
+      try {
+        const plan = await pausePlan(prisma, req.params.id);
+        return res.status(200).json(plan);
+      } catch (error) {
+        if (error instanceof CatalogError) {
+          return res.status(error.statusCode).json({ error: { message: error.message } });
+        }
+        return next(error);
+      }
+    },
+
+    close: async (req, res, next) => {
+      try {
+        const plan = await closePlan(prisma, req.params.id);
+        return res.status(200).json(plan);
+      } catch (error) {
+        if (error instanceof CatalogError) {
+          return res.status(error.statusCode).json({ error: { message: error.message } });
+        }
+        return next(error);
+      }
+    },
+
+    renew: async (req, res, next) => {
+      try {
+        const plan = await renewPlan(prisma, req.params.id);
+        return res.status(200).json(plan);
       } catch (error) {
         if (error instanceof CatalogError) {
           return res.status(error.statusCode).json({ error: { message: error.message } });

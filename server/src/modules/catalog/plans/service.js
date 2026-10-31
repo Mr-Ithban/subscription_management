@@ -1,4 +1,5 @@
 import { buildPaginationMeta } from '../../../middleware/pagination.js';
+import { getNextBillingDate } from '../billingPeriod.js';
 
 export class CatalogError extends Error {
   constructor(message, statusCode = 400) {
@@ -119,3 +120,67 @@ export async function deletePlan(prisma, id) {
     throw error;
   }
 }
+
+export async function pausePlan(prisma, id) {
+  const plan = await getPlanById(prisma, id);
+
+  if (!plan.allowPause) {
+    throw new CatalogError('Plan does not allow pausing', 409);
+  }
+
+  if (plan.status === 'PAUSED') {
+    throw new CatalogError('Plan is already paused', 409);
+  }
+
+  if (plan.status !== 'ACTIVE') {
+    throw new CatalogError('Cannot pause a plan that is not ACTIVE', 409);
+  }
+
+  return prisma.plan.update({
+    where: { id },
+    data: { status: 'PAUSED' },
+    include: { product: true },
+  });
+}
+
+export async function closePlan(prisma, id) {
+  const plan = await getPlanById(prisma, id);
+
+  if (!plan.allowEarlyClose) {
+    throw new CatalogError('Plan does not allow early close', 409);
+  }
+
+  if (plan.status === 'CLOSED') {
+    throw new CatalogError('Plan is already closed', 409);
+  }
+
+  return prisma.plan.update({
+    where: { id },
+    data: { status: 'CLOSED' },
+    include: { product: true },
+  });
+}
+
+export async function renewPlan(prisma, id) {
+  const plan = await getPlanById(prisma, id);
+
+  if (!plan.allowRenew) {
+    throw new CatalogError('Plan does not allow renewal', 409);
+  }
+
+  if (!plan.endDate) {
+    throw new CatalogError('Cannot renew a plan with no end date', 409);
+  }
+
+  const newEndDate = getNextBillingDate(plan.endDate, plan.billingPeriod);
+
+  return prisma.plan.update({
+    where: { id },
+    data: {
+      endDate: newEndDate,
+      status: 'ACTIVE',
+    },
+    include: { product: true },
+  });
+}
+

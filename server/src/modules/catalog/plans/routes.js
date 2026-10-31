@@ -23,6 +23,11 @@ export function createPlansRouter(prisma = defaultPrisma) {
   router.put('/:id', authorize('ADMIN'), validate(updatePlanSchema), controller.update);
   router.delete('/:id', authorize('ADMIN'), controller.delete);
 
+  // Plan actions
+  router.post('/:id/pause', authorize('ADMIN'), controller.pause);
+  router.post('/:id/close', authorize('ADMIN'), controller.close);
+  router.post('/:id/renew', authorize('ADMIN'), controller.renew);
+
   return router;
 }
 

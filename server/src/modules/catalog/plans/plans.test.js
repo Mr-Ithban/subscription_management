@@ -405,4 +405,331 @@ describe('Plan API Endpoints & RBAC', () => {
       });
     });
   });
+
+  describe('Plan Actions: pause, close, renew', () => {
+    describe('POST /api/plans/:id/pause', () => {
+      it('pauses an ACTIVE plan when allowPause is true', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'ACTIVE',
+          allowPause: true,
+        });
+        mockPrisma.plan.update.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'PAUSED',
+          allowPause: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/pause')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('PAUSED');
+        expect(mockPrisma.plan.update).toHaveBeenCalledWith({
+          where: { id: 'plan-1' },
+          data: { status: 'PAUSED' },
+          include: { product: true },
+        });
+      });
+
+      it('returns 409 when plan has allowPause = false', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'ACTIVE',
+          allowPause: false,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/pause')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Plan does not allow pausing' } });
+      });
+
+      it('returns 409 when plan is already PAUSED', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'PAUSED',
+          allowPause: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/pause')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Plan is already paused' } });
+      });
+
+      it('returns 409 when plan is CLOSED', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'CLOSED',
+          allowPause: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/pause')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Cannot pause a plan that is not ACTIVE' } });
+      });
+
+      it('returns 404 if plan does not exist', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue(null);
+
+        const res = await request(app)
+          .post('/api/plans/non-existent/pause')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: { message: 'Plan not found' } });
+      });
+
+      it('rejects staff role with 403', async () => {
+        const res = await request(app)
+          .post('/api/plans/plan-1/pause')
+          .set('Authorization', `Bearer ${staffToken}`);
+
+        expect(res.status).toBe(403);
+      });
+    });
+
+    describe('POST /api/plans/:id/close', () => {
+      it('closes an ACTIVE plan when allowEarlyClose is true', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'ACTIVE',
+          allowEarlyClose: true,
+        });
+        mockPrisma.plan.update.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'CLOSED',
+          allowEarlyClose: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/close')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('CLOSED');
+        expect(mockPrisma.plan.update).toHaveBeenCalledWith({
+          where: { id: 'plan-1' },
+          data: { status: 'CLOSED' },
+          include: { product: true },
+        });
+      });
+
+      it('closes a PAUSED plan when allowEarlyClose is true', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'PAUSED',
+          allowEarlyClose: true,
+        });
+        mockPrisma.plan.update.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'CLOSED',
+          allowEarlyClose: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/close')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('CLOSED');
+      });
+
+      it('returns 409 when allowEarlyClose is false', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'ACTIVE',
+          allowEarlyClose: false,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/close')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Plan does not allow early close' } });
+      });
+
+      it('returns 409 when plan is already CLOSED', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'CLOSED',
+          allowEarlyClose: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/close')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Plan is already closed' } });
+      });
+
+      it('returns 404 if plan does not exist', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue(null);
+
+        const res = await request(app)
+          .post('/api/plans/non-existent/close')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(404);
+      });
+
+      it('rejects customer role with 403', async () => {
+        const res = await request(app)
+          .post('/api/plans/plan-1/close')
+          .set('Authorization', `Bearer ${customerToken}`);
+
+        expect(res.status).toBe(403);
+      });
+    });
+
+    describe('POST /api/plans/:id/renew', () => {
+      it('renews a CLOSED plan by extending endDate by one billing period and setting status ACTIVE', async () => {
+        const oldEndDate = new Date('2024-01-31T00:00:00.000Z');
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'CLOSED',
+          billingPeriod: 'MONTHLY',
+          endDate: oldEndDate,
+          allowRenew: true,
+        });
+
+        const expectedNewEndDate = getNextBillingDate(oldEndDate, 'MONTHLY');
+        mockPrisma.plan.update.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'ACTIVE',
+          billingPeriod: 'MONTHLY',
+          endDate: expectedNewEndDate,
+          allowRenew: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/renew')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('ACTIVE');
+        expect(mockPrisma.plan.update).toHaveBeenCalledWith({
+          where: { id: 'plan-1' },
+          data: {
+            endDate: expectedNewEndDate,
+            status: 'ACTIVE',
+          },
+          include: { product: true },
+        });
+      });
+
+      it('renews an ACTIVE plan with YEARLY billing period', async () => {
+        const currentEndDate = new Date('2024-02-29T00:00:00.000Z'); // Leap year
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-2',
+          name: 'Annual Leap',
+          status: 'ACTIVE',
+          billingPeriod: 'YEARLY',
+          endDate: currentEndDate,
+          allowRenew: true,
+        });
+
+        const expectedNewEndDate = getNextBillingDate(currentEndDate, 'YEARLY');
+        mockPrisma.plan.update.mockResolvedValue({
+          id: 'plan-2',
+          status: 'ACTIVE',
+          endDate: expectedNewEndDate,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-2/renew')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('ACTIVE');
+        expect(mockPrisma.plan.update).toHaveBeenCalledWith({
+          where: { id: 'plan-2' },
+          data: {
+            endDate: expectedNewEndDate,
+            status: 'ACTIVE',
+          },
+          include: { product: true },
+        });
+      });
+
+      it('returns 409 when allowRenew is false', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Pro Monthly',
+          status: 'CLOSED',
+          billingPeriod: 'MONTHLY',
+          endDate: new Date('2024-01-31'),
+          allowRenew: false,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/renew')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Plan does not allow renewal' } });
+      });
+
+      it('returns 409 when plan has no endDate', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue({
+          id: 'plan-1',
+          name: 'Open Ended Plan',
+          status: 'ACTIVE',
+          billingPeriod: 'MONTHLY',
+          endDate: null,
+          allowRenew: true,
+        });
+
+        const res = await request(app)
+          .post('/api/plans/plan-1/renew')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: { message: 'Cannot renew a plan with no end date' } });
+      });
+
+      it('returns 404 if plan does not exist', async () => {
+        mockPrisma.plan.findUnique.mockResolvedValue(null);
+
+        const res = await request(app)
+          .post('/api/plans/non-existent/renew')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.status).toBe(404);
+      });
+
+      it('rejects staff role with 403', async () => {
+        const res = await request(app)
+          .post('/api/plans/plan-1/renew')
+          .set('Authorization', `Bearer ${staffToken}`);
+
+        expect(res.status).toBe(403);
+      });
+    });
+  });
 });
+

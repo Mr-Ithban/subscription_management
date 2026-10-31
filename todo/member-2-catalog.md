@@ -44,7 +44,7 @@
 
 ---
 
-## [ ] M2-4: Plan Pause, Close, Renew and Auto-Close
+## [x] M2-4: Plan Pause, Close, Renew and Auto-Close
 - **Branch**: `feature/m2-plan-actions`
 - **Scope**: `server/src/modules/catalog/plans`, `server/src/jobs/`
 - **Requirements**:
